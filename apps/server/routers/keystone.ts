@@ -1,62 +1,55 @@
 import { Router, type Request, type Response } from 'express'
+import express from 'express'
 import {
-  verifyKeystoneSignature,
   validateWebhookPayload,
   handleEnroll,
   handleUnenroll,
   handleGroupsModify,
 } from '../lib/keystone'
+import { prisma } from '@repo/database'
 
 const router = Router()
 
 // ============================================================
-// POST /webhooks/keystone
+// POST /api/v1/keystone/webhook
 //
 // Receives device lifecycle events from KeyStone:
 //   enroll       — device enrolled, create/update MDM record
 //   unenroll     — device removed, revoke token + soft delete
 //   groupsmodify — group membership changed, resync + requeue policy
-//
-// Mount with express.raw() to preserve the raw body for HMAC
-// verification. In your main app:
-//
-//   app.use('/webhooks', express.raw({ type: 'application/json' }), router)
 // ============================================================
 
-router.post('/keystone', async (req: Request, res: Response) => {
-  const secret = process.env.KEYSTONE_WEBHOOK_SECRET
+router.post('/webhook/device', express.json(), async (req: Request, res: Response) => {
+  const tenant = await prisma.tenant.findUnique({
+    where: {
+      id: req.body.tenantId,
+    }
+  })
+
+  if (!tenant || !req.body.tenantId) {
+    console.error('[webhook] tenant not found', req.body.tenantId)
+    return res.status(404).json({ error: 'Tenant not found' })
+  }
+
+  const secret = tenant.enrollmentToken
 
   if (!secret) {
-    console.error('[webhook] KEYSTONE_WEBHOOK_SECRET is not set')
-    return res.status(500).json({ error: 'Webhook secret not configured' })
+    console.error('[webhook] enrollment secret not set for tenant', tenant.id)
+    return res.status(500).json({ error: 'Enrollment secret not configured' })
   }
 
-  const rawBody = req.body.toString('utf-8')
-  const signature = req.headers['x-keystone-signature'] as string | undefined
-
-  const valid = await verifyKeystoneSignature(rawBody, signature, secret)
-  if (!valid) {
-    console.warn('[webhook] rejected request with invalid signature')
-    return res.status(401).json({ error: 'Invalid signature' })
-  }
-
-  let payload
-  try {
-    payload = validateWebhookPayload(JSON.parse(rawBody))
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Invalid payload'
-    console.error('[webhook] payload validation failed:', message)
-    return res.status(400).json({ error: message })
+  if (req.headers.authorization?.split(' ')[1] !== secret) {
+    return res.status(401).json({ error: 'Invalid enrollment secret' })
   }
 
   try {
-    switch (payload.event) {
-      case 'enroll': await handleEnroll(payload.device); break
-      case 'unenroll': await handleUnenroll(payload.device); break
-      case 'groupsmodify': await handleGroupsModify(payload.device); break
+    switch (req.body.event) {
+      case 'enroll': await handleEnroll(req.body.device); break
+      case 'unenroll': await handleUnenroll(req.body.device); break
+      case 'groupsmodify': await handleGroupsModify(req.body.device); break
     }
   } catch (err) {
-    console.error(`[webhook] error handling event "${payload.event}"`, err)
+    console.error(`[webhook] error handling event "${req.body.event}"`, err)
     return res.status(500).json({ error: 'Internal error' })
   }
 

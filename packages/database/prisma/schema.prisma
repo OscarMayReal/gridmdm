@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client-ts"
   output   = "../generated/prisma"
 }
 
@@ -96,18 +96,20 @@ enum OnConflict {
 // ============================================================
 
 model Tenant {
-  id         String   @id // KeyStone org_id
-  name       String
-  domains    String[] // e.g. ["acme.com", "acme.co.uk"]
-  mdmEnabled Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id          String   @id // KeyStone org_id
+  name        String
+  displayName String
+  domains     String[] // e.g. ["acme.com", "acme.co.uk"]
+  mdmEnabled  Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   devices           Device[]
   keystoneGroups    KeyStoneGroup[]
   enrolmentProfiles EnrolmentProfile[]
   policies          Policy[]
   appPolicies       AppPolicy[]
+  enrollmentToken   String
 
   @@map("organisations")
 }
@@ -133,11 +135,13 @@ model KeyStoneGroup {
 
 // Mirrors a KeyStone user. Stored when a device is assigned to them.
 model KeyStoneUser {
-  id          String   @id // KeyStone user_id
-  displayName String
-  email       String   @unique
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id // KeyStone user_id
+  username  String
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  role      String
 
   assignedDevices Device[]     @relation("AssignedUser")
   appRequests     AppRequest[]

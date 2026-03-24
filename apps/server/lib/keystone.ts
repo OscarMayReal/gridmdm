@@ -24,7 +24,9 @@ export interface KeyStoneGroup {
 
 export interface KeyStoneUser {
   id: string
-  displayName: string
+  name: string
+  username: string
+  role: string
   email: string
 }
 
@@ -50,6 +52,7 @@ export type WebhookEvent = 'enroll' | 'unenroll' | 'groupsmodify'
 
 export interface WebhookPayload {
   event: WebhookEvent
+  tenantId: string
   device: KeyStoneDevice
 }
 
@@ -79,11 +82,15 @@ function isArray(v: unknown): v is unknown[] {
 function validateUser(raw: unknown, field: string): KeyStoneUser {
   if (!isObject(raw)) throw new Error(`${field} must be an object`)
   if (!isString(raw.id)) throw new Error(`${field}.id must be a string`)
-  if (!isString(raw.displayName)) throw new Error(`${field}.displayName must be a string`)
+  if (!isString(raw.name)) throw new Error(`${field}.name must be a string`)
+  if (!isString(raw.username)) throw new Error(`${field}.username must be a string`)
+  if (!isString(raw.role)) throw new Error(`${field}.role must be a string`)
   if (!isString(raw.email)) throw new Error(`${field}.email must be a string`)
   return {
     id: raw.id,
-    displayName: raw.displayName,
+    name: raw.name,
+    username: raw.username,
+    role: raw.role,
     email: raw.email,
   }
 }
@@ -153,40 +160,9 @@ export function validateWebhookPayload(raw: unknown): WebhookPayload {
 
   return {
     event: raw.event as WebhookEvent,
+    tenantId: raw.tenantId,
     device: validateDevice(raw.device),
   }
-}
-
-// ============================================================
-// SIGNATURE VERIFICATION
-// ============================================================
-
-export async function verifyKeystoneSignature(
-  body: string,
-  signature: string | undefined,
-  secret: string
-): Promise<boolean> {
-  if (!signature) return false
-
-  const encoder = new TextEncoder()
-  const key = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  )
-
-  const mac = await crypto.subtle.sign('HMAC', key, encoder.encode(body))
-  const expected = 'sha256=' + Buffer.from(mac).toString('hex')
-
-  // Constant-time comparison to prevent timing attacks
-  if (expected.length !== signature.length) return false
-  let mismatch = 0
-  for (let i = 0; i < expected.length; i++) {
-    mismatch |= expected.charCodeAt(i) ^ signature.charCodeAt(i)
-  }
-  return mismatch === 0
 }
 
 // ============================================================
@@ -196,8 +172,8 @@ export async function verifyKeystoneSignature(
 export async function upsertKeystoneUser(user: KeyStoneUser) {
   return prisma.keyStoneUser.upsert({
     where: { id: user.id },
-    update: { displayName: user.displayName, email: user.email },
-    create: { id: user.id, displayName: user.displayName, email: user.email },
+    update: { name: user.name, username: user.username, email: user.email, role: user.role },
+    create: { id: user.id, name: user.name, username: user.username, email: user.email, role: user.role },
   })
 }
 
@@ -301,7 +277,7 @@ export async function handleEnroll(device: KeyStoneDevice): Promise<void> {
     where: { deviceId: device.id },
   })
   if (!existingToken) {
-    const token = await generateDeviceToken()
+    const token = generateDeviceToken()
     await prisma.deviceToken.create({
       data: { deviceId: device.id, token },
     })
