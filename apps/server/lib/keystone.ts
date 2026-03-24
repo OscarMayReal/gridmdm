@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { DeviceHardwareType, DeviceSoftwareType, prisma } from '@repo/database'
 // import { generateDeviceToken } from '../auth/token'
 
 function generateDeviceToken(): string {
@@ -46,6 +46,7 @@ export interface KeyStoneDevice {
   groups: KeyStoneGroup[]
   user: KeyStoneUser | null
   enrolledBy: KeyStoneUser | null
+  serialNumber: string | null
 }
 
 export type WebhookEvent = 'enroll' | 'unenroll' | 'groupsmodify'
@@ -147,6 +148,7 @@ function validateDevice(raw: unknown): KeyStoneDevice {
     groups: raw.groups.map((g, i) => validateGroup(g, i)),
     user: raw.user != null ? validateUser(raw.user, 'user') : null,
     enrolledBy: raw.enrolledBy != null ? validateUser(raw.enrolledBy, 'enrolledBy') : null,
+    serialNumber: isString(raw.serialNumber) ? raw.serialNumber : null,
   }
 }
 
@@ -249,16 +251,22 @@ export async function handleEnroll(device: KeyStoneDevice): Promise<void> {
   await prisma.device.upsert({
     where: { id: device.id },
     update: {
-      hostname: device.name,
+      name: device.name,
       osVersion: device.osVersion,
       status: 'MANAGED',
       assignedUserId: device.user?.id ?? null,
       updatedAt: new Date(),
     },
     create: {
+      serialNumber: device.serialNumber,
+      isSelfEnrolled: device.isSelfEnrolled,
+      os: device.os,
+      hardwareType: device.hardwareType as DeviceHardwareType,
+      softwareType: device.softwareType as DeviceSoftwareType,
       id: device.id,
       tenantId,
-      hostname: device.name,
+      name: device.name,
+      displayName: device.displayName,
       arch: device.extraInfo?.arch as string ?? 'unknown',
       osVersion: device.osVersion,
       enrolmentMethod: device.isSelfEnrolled ? 'KEYSTONE_ACCOUNT' : 'ADMIN_MANUAL',
