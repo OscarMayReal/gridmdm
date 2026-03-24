@@ -1,0 +1,510 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum EnrolmentMethod {
+  KEYSTONE_ACCOUNT
+  ADMIN_MANUAL
+  USB_INSTALLER
+}
+
+enum DeviceStatus {
+  ENROLLING
+  MANAGED
+  BLOCKED
+  UNENROLLED
+}
+
+enum DeviceMode {
+  OPEN
+  MANAGED
+  KIOSK
+}
+
+enum PolicyType {
+  DEVICE_POLICY
+  APP_POLICY
+}
+
+enum PolicyBlockType {
+  DCONF
+  FILE
+  EXEC
+  SYSTEMD
+  LAPS
+}
+
+enum AppRule {
+  FORCED
+  OPTIONAL
+  ALLOWED
+  BLOCKED
+}
+
+enum AppSource {
+  FLATPAK
+  SNAP
+}
+
+enum AppRequestStatus {
+  PENDING_APPROVAL
+  APPROVED
+  DENIED
+  INSTALLED
+  FAILED
+}
+
+enum CommandStatus {
+  QUEUED
+  RECEIVED
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+enum CommandAction {
+  APP_INSTALL
+  APP_REMOVE
+  REEVALUATE_POLICY
+  LOGOUT_USER
+  BLOCK_DEVICE
+  UNBLOCK_DEVICE
+  LAPS_ROTATE
+  UPDATE_AGENT
+}
+
+enum OnConflict {
+  OVERWRITE
+  SKIP
+  FORCE
+  ABORT
+}
+
+// ============================================================
+// KEYSTONE SYNC
+// Mirrors data pushed to MDM via KeyStone webhooks.
+// MDM never writes to KeyStone — these are read-only mirrors.
+// ============================================================
+
+model Tenant {
+  id         String   @id // KeyStone org_id
+  name       String
+  domains    String[] // e.g. ["acme.com", "acme.co.uk"]
+  mdmEnabled Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  devices           Device[]
+  keystoneGroups    KeyStoneGroup[]
+  enrolmentProfiles EnrolmentProfile[]
+  policies          Policy[]
+  appPolicies       AppPolicy[]
+
+  @@map("organisations")
+}
+
+// Mirrors a KeyStone group. MDM never creates or deletes these —
+// they are pushed via the enrol/group-changed webhooks.
+model KeyStoneGroup {
+  id        String @id // KeyStone group_id
+  name      String
+  tenantId  String
+  groupname String
+
+  tenant  Tenant        @relation(fields: [tenantId], references: [id])
+  devices DeviceGroup[]
+
+  // Enrolment profiles that match on this group
+  profileConditions EnrolmentProfileCondition[]
+  // Policies assigned to this group
+  policyAssignments PolicyAssignment[]
+
+  @@map("keystone_groups")
+}
+
+// Mirrors a KeyStone user. Stored when a device is assigned to them.
+model KeyStoneUser {
+  id          String   @id // KeyStone user_id
+  displayName String
+  email       String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assignedDevices Device[]     @relation("AssignedUser")
+  appRequests     AppRequest[]
+  enrolledDevices Device[]     @relation("EnrolledUser")
+
+  @@map("keystone_users")
+}
+
+// ============================================================
+// DEVICES
+// ============================================================
+
+model Device {
+  id              String          @id @default(uuid())
+  tenantId        String
+  hostname        String
+  arch            String
+  osVersion       String
+  enrolmentMethod EnrolmentMethod
+  enrolledAt      DateTime        @default(now())
+  lastSeenAt      DateTime?
+  lastPolicyApply DateTime?
+  status          DeviceStatus    @default(ENROLLING)
+  agentVersion    String?
+  mdmTags         String[]
+  updatedAt       DateTime        @updatedAt
+
+  // The KeyStone user who enrolled this device (first user wins — immutable)
+  enrolledById String?
+  enrolledBy   KeyStoneUser? @relation("EnrolledUser", fields: [enrolledById], references: [id])
+
+  // Current assigned user (can change via KeyStone webhook)
+  assignedUserId String?
+  assignedUser   KeyStoneUser? @relation("AssignedUser", fields: [assignedUserId], references: [id])
+
+  // Enrolment profile used at enrolment time (snapshot — immutable)
+  enrolmentProfileId String?
+  enrolmentProfile   EnrolmentProfile? @relation(fields: [enrolmentProfileId], references: [id])
+
+  tenantRelation Tenant @relation(fields: [tenantId], references: [id])
+
+  // KeyStone group memberships (replaced wholesale on group-changed webhook)
+  groups DeviceGroup[]
+
+  // Device token for authenticating manifest/command requests
+  token DeviceToken?
+
+  // Block info (set when status = BLOCKED)
+  blockInfo DeviceBlock?
+
+  // Installed apps (reported by agent)
+  installedApps InstalledApp[]
+
+  // Command queue
+  commands Command[]
+
+  // App requests made from this device
+  appRequests AppRequest[]
+
+  // LAPS
+  laps DeviceLaps?
+
+  @@map("devices")
+}
+
+// Junction table for device ↔ KeyStone group membership.
+// Replaced wholesale when KeyStone pushes a group-changed event.
+model DeviceGroup {
+  deviceId String
+  groupId  String
+
+  device Device        @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  group  KeyStoneGroup @relation(fields: [groupId], references: [id])
+
+  @@id([deviceId, groupId])
+  @@map("device_groups")
+}
+
+model DeviceToken {
+  id        String    @id @default(uuid())
+  deviceId  String    @unique
+  token     String    @unique
+  issuedAt  DateTime  @default(now())
+  expiresAt DateTime?
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@map("device_tokens")
+}
+
+model DeviceBlock {
+  id        String   @id @default(uuid())
+  deviceId  String   @unique
+  reason    String
+  message   String? // Shown on device lock screen
+  blockedAt DateTime @default(now())
+  blockedBy String // admin user ID or "system"
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@map("device_blocks")
+}
+
+// ============================================================
+// ENROLMENT PROFILES
+// Admins create these in the MDM console. KeyStone user groups
+// are evaluated against profile conditions at enrolment time
+// to determine which device groups to assign.
+// ============================================================
+
+model EnrolmentProfile {
+  id          String  @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  priority    Int     @default(100)
+
+  // Human-readable feature list shown on the OOBE confirmation screen
+  features String[]
+
+  // Whether OOBE shows a confirmation screen before applying
+  requiresConfirmation Boolean @default(true)
+  confirmationMessage  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant      Tenant                            @relation(fields: [tenantId], references: [id])
+  conditions  EnrolmentProfileCondition[]
+  assignments EnrolmentProfileGroupAssignment[]
+  devices     Device[]
+
+  @@map("enrolment_profiles")
+}
+
+// A condition that must match for a profile to apply.
+// All conditions within a profile use AND logic.
+model EnrolmentProfileCondition {
+  id        String @id @default(uuid())
+  profileId String
+  groupId   String // Must be a member of this KeyStone group
+
+  profile EnrolmentProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  group   KeyStoneGroup    @relation(fields: [groupId], references: [id])
+
+  @@unique([profileId, groupId])
+  @@map("enrolment_profile_conditions")
+}
+
+// Device groups assigned when a profile matches.
+// These are MDM-internal group IDs, not KeyStone groups.
+model EnrolmentProfileGroupAssignment {
+  id        String @id @default(uuid())
+  profileId String
+  groupId   String // KeyStone group_id to assign device to
+
+  profile EnrolmentProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("enrolment_profile_group_assignments")
+}
+
+// ============================================================
+// POLICIES
+// ============================================================
+
+model Policy {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  version     String   @default("1.0.0")
+  priority    Int      @default(100)
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String // KeyStone user ID
+
+  tenant      Tenant             @relation(fields: [tenantId], references: [id])
+  assignments PolicyAssignment[]
+  blocks      PolicyBlock[]
+
+  @@map("policies")
+}
+
+// Which KeyStone groups (or all devices) a policy applies to.
+model PolicyAssignment {
+  id       String  @id @default(uuid())
+  policyId String
+  groupId  String? // null = applies to all devices in org
+  priority Int     @default(100)
+
+  policy Policy         @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  group  KeyStoneGroup? @relation(fields: [groupId], references: [id])
+
+  @@map("policy_assignments")
+}
+
+// A block within a policy (dconf, file, exec, systemd, laps).
+// The content of each block is stored as JSON since the shape
+// differs significantly between types.
+model PolicyBlock {
+  id          String          @id @default(uuid())
+  policyId    String
+  type        PolicyBlockType
+  priority    Int             @default(0)
+  description String?
+  content     Json // Type-specific content
+
+  policy Policy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+
+  @@map("policy_blocks")
+}
+
+// ============================================================
+// APP POLICIES
+// ============================================================
+
+model AppPolicy {
+  id          String     @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  version     String     @default("1.0.0")
+  priority    Int        @default(100)
+  deviceMode  DeviceMode @default(MANAGED)
+  enabled     Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdBy   String // KeyStone user ID
+
+  tenant      Tenant                @relation(fields: [tenantId], references: [id])
+  assignments AppPolicyAssignment[]
+  apps        AppPolicyEntry[]
+
+  @@map("app_policies")
+}
+
+model AppPolicyAssignment {
+  id          String  @id @default(uuid())
+  appPolicyId String
+  groupId     String? // null = all devices in org
+  priority    Int     @default(100)
+
+  appPolicy AppPolicy @relation(fields: [appPolicyId], references: [id], onDelete: Cascade)
+
+  @@map("app_policy_assignments")
+}
+
+// A single app entry within an app policy.
+model AppPolicyEntry {
+  id                String    @id @default(uuid())
+  appPolicyId       String
+  appId             String // e.g. org.mozilla.firefox
+  source            AppSource
+  remote            String? // Flatpak remote name
+  remoteUrl         String? // For private remotes
+  rule              AppRule
+  autoUpdate        Boolean   @default(true)
+  userRemovable     Boolean   @default(true)
+  allowUserRequest  Boolean   @default(false) // For ALLOWED apps — can user request?
+  requireReason     Boolean   @default(false)
+  removeIfPresent   Boolean   @default(false) // For BLOCKED — remove if already installed
+  blockReason       String?
+  versionConstraint String? // e.g. ">=120.0"
+  matchType         String    @default("exact") // exact or glob
+
+  appPolicy AppPolicy @relation(fields: [appPolicyId], references: [id], onDelete: Cascade)
+
+  @@unique([appPolicyId, appId])
+  @@map("app_policy_entries")
+}
+
+// ============================================================
+// INSTALLED APPS
+// Reported by the agent on each check-in.
+// ============================================================
+
+model InstalledApp {
+  id            String    @id @default(uuid())
+  deviceId      String
+  appId         String
+  source        AppSource
+  version       String
+  installSource String // e.g. "policy:baseline" or "request:req_xyz"
+  installedAt   DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@unique([deviceId, appId])
+  @@map("installed_apps")
+}
+
+// ============================================================
+// APP REQUESTS
+// User-initiated requests for ALLOWED apps, routed through
+// admin approval before an install command is queued.
+// ============================================================
+
+model AppRequest {
+  id          String           @id @default(uuid())
+  deviceId    String
+  userId      String // KeyStone user who requested
+  appId       String
+  source      AppSource
+  remote      String?
+  reason      String?
+  status      AppRequestStatus @default(PENDING_APPROVAL)
+  requestedAt DateTime         @default(now())
+
+  // Review
+  reviewedBy String? // admin KeyStone user ID
+  reviewedAt DateTime?
+  reviewNote String?
+
+  // Linked command (set once approved and command queued)
+  commandId String? @unique
+
+  device  Device       @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  user    KeyStoneUser @relation(fields: [userId], references: [id])
+  command Command?     @relation(fields: [commandId], references: [id])
+
+  @@map("app_requests")
+}
+
+// ============================================================
+// COMMAND QUEUE
+// Both WebSocket-delivered and poll-drained commands live here.
+// ============================================================
+
+model Command {
+  id          String        @id @default(uuid())
+  deviceId    String
+  action      CommandAction
+  payload     Json?
+  status      CommandStatus @default(QUEUED)
+  issuedAt    DateTime      @default(now())
+  issuedBy    String // admin user ID or "policy:xxx"
+  receivedAt  DateTime?
+  completedAt DateTime?
+  detail      String? // Success detail or error message
+
+  device     Device      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  appRequest AppRequest?
+
+  @@map("commands")
+}
+
+// ============================================================
+// LAPS
+// Encrypted password stored server-side. Plaintext never persisted.
+// ============================================================
+
+model DeviceLaps {
+  id                String    @id @default(uuid())
+  deviceId          String    @unique
+  encryptedPassword String // Encrypted with MDM server public key
+  algorithm         String    @default("RSA-OAEP-256")
+  rotatedAt         DateTime  @default(now())
+  expiresAt         DateTime?
+  rotationRequested Boolean   @default(false) // Set true after admin retrieval
+
+  // Last retrieval metadata (not a full log — see audit log for history)
+  lastRetrievedBy String?
+  lastRetrievedAt DateTime?
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@map("device_laps")
+}
