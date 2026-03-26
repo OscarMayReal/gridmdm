@@ -197,7 +197,7 @@ model Device {
 
   // Current assigned user (can change via KeyStone webhook)
   assignedUserId String?
-  assignedUser   KeyStoneUser? @relation("AssignedUser", fields: [assignedUserId], references: [id])
+  user           KeyStoneUser? @relation("AssignedUser", fields: [assignedUserId], references: [id])
 
   // Enrolment profile used at enrolment time (snapshot — immutable)
   enrolmentProfileId String?

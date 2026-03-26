@@ -1,16 +1,16 @@
 "use client"
 import { DevicesTable } from "@/components/devicestable";
 import { usePageContext } from "@/components/pageheader";
-import { MonitorSmartphoneIcon } from "lucide-react";
+import { ListIcon, MonitorSmartphoneIcon } from "lucide-react";
 import { useEffect } from "react";
 
 export default function AllDevicesPage() {
     const { setAreaTitle, setIcon, setTitle, setDescription } = usePageContext();
     useEffect(() => {
-        setAreaTitle("All Devices");
-        setIcon(MonitorSmartphoneIcon);
-        setTitle("Devices");
-        setDescription("Manage all enrolled devices");
+        setAreaTitle("All Profiles");
+        setIcon(ListIcon);
+        setTitle("Profiles");
+        setDescription("Manage all device profiles");
     }, []);
     return <div className="p-4">
         <DevicesTable />

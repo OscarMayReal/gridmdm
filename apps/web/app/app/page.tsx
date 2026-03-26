@@ -5,14 +5,16 @@ import { usePageContext } from "@/components/pageheader";
 import { useEffect } from "react";
 
 export default function App() {
-    const { setAreaTitle, setIcon } = usePageContext();
+    const { setAreaTitle, setIcon, setTitle, setDescription } = usePageContext();
     useEffect(() => {
         setAreaTitle("");
         setIcon(HomeIcon);
+        setTitle("Home");
+        setDescription("Welcome to Quntem Grid Admin Console");
     }, []);
     return (
         <div>
-            <PageHeader title="Home" description="Welcome to Quntem Grid Admin Console" />
+            <PageHeader />
         </div>
     );
 }

@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { flexRender } from "@tanstack/react-table";
 
-export function GenericTable({ table }: { table: any }) {
+export function GenericTable({ table, onRowClick }: { table: any, onRowClick?: (row: any) => void }) {
     return (
         <Table>
             <TableHeader>
@@ -17,7 +17,7 @@ export function GenericTable({ table }: { table: any }) {
             </TableHeader>
             <TableBody>
                 {table.getRowModel().rows.map(row => (
-                    <TableRow key={row.id} className="hover:bg-black/5">
+                    <TableRow key={row.id} className="hover:bg-black/5" onClick={() => onRowClick?.(row)}>
                         {row.getVisibleCells().map(cell => (
                             <TableCell key={cell.id}>
                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}

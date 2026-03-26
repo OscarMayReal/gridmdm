@@ -1,8 +1,10 @@
+"use client"
 import { useReactTable, getCoreRowModel, flexRender, getFilteredRowModel, Column, Table } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { Device } from "@repo/database";
 import { GenericTable } from "./generictable";
 import { Input } from "./ui/input";
+import { useRouter } from "next/navigation";
 
 export function DevicesTable() {
     const [devices, setDevices] = useState<{ data: Device[], loaded: boolean }>({ data: [], loaded: false });
@@ -70,13 +72,14 @@ export function DevicesTable() {
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
     })
+    const router = useRouter();
     return (
         <>
             <div className="flex flex-row gap-[10px] pb-[10px]">
                 <Filter columnFilterValue={columnFilters} setColumnFilterValue={setColumnFilters} />
             </div>
             <div className="bg-white rounded-md border-1 border-[#e4e4e7] overflow-hidden">
-                <GenericTable table={table} />
+                <GenericTable table={table} onRowClick={(row) => router.push(`/app/devices/device/${row.original.id}`)} />
             </div>
         </>
     )

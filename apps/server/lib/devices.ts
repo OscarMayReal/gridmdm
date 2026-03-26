@@ -11,11 +11,43 @@ export async function listdevices({ tenantId }: { tenantId: string }) {
                     group: true
                 }
             },
-            assignedUser: true,
+            user: true,
             installedApps: true,
             enrolledBy: true,
             tenant: true
         }
     });
     return devices;
+}
+
+export async function getdevice({ tenantId, deviceId }: { tenantId: string, deviceId: string }) {
+    const device = await prisma.device.findUnique({
+        where: {
+            id: deviceId,
+            tenantId: tenantId
+        },
+        include: {
+            groups: {
+                include: {
+                    group: true
+                }
+            },
+            user: true,
+            installedApps: true,
+            enrolledBy: true,
+            tenant: true
+        }
+    });
+    return device;
+}
+
+export async function updateDevice({ tenantId, deviceId, data }: { tenantId: string, deviceId: string, data: any }) {
+    const device = await prisma.device.update({
+        where: {
+            id: deviceId,
+            tenantId: tenantId
+        },
+        data: data
+    });
+    return device;
 }

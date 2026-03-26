@@ -1,6 +1,6 @@
 "use client"
 import { SidebarProvider, Sidebar, SidebarRail, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarTrigger } from "@/components/ui/sidebar";
-import { ArrowLeftIcon, GroupIcon, HomeIcon, MonitorSmartphoneIcon, SettingsIcon, ShieldIcon, ShoppingBasketIcon, SidebarIcon } from "lucide-react";
+import { ArrowLeftIcon, GroupIcon, HomeIcon, ListIcon, MonitorSmartphoneIcon, SettingsIcon, ShieldIcon, ShoppingBasketIcon, SidebarIcon } from "lucide-react";
 import { SidebarItem } from "@/components/sidebar";
 import { PageContextProvider } from "@/components/pageheader";
 import { AuthProvider, useAuthContext } from "@/components/auth";
@@ -17,15 +17,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <SidebarContent>
                     <SidebarGroup>
                         <SidebarGroupContent className="flex flex-col gap-[4px]">
-                            <SidebarTrigger className="w-full flex flex-row justify-end p-[8px] mb-[4px]">
+                            {/* <SidebarTrigger className="w-full flex flex-row justify-end p-[8px] mb-[4px]">
                                 <ArrowLeftIcon />
-                            </SidebarTrigger>
+                            </SidebarTrigger> */}
                             <SidebarItem equals Icon={HomeIcon} label="Home" href="/app" />
                             <SidebarItem Icon={MonitorSmartphoneIcon} label="Devices" href="/app/devices" />
                             <SidebarItem Icon={GroupIcon} label="Groups" href="/app/groups" />
+                            <SidebarItem Icon={ListIcon} label="Profiles" href="/app/profiles" />
                             <SidebarItem Icon={ShoppingBasketIcon} label="Apps" href="/app/apps" />
                             <SidebarItem Icon={ShieldIcon} label="Policies" href="/app/policies" />
-                            <SidebarItem Icon={SettingsIcon} label="Profiles" href="/app/profiles" />
                         </SidebarGroupContent>
                     </SidebarGroup>
                 </SidebarContent>

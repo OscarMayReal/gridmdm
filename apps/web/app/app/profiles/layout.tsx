@@ -2,7 +2,7 @@
 import { PageHeader } from "@/components/pageheader";
 import { SidebarItem } from "@/components/sidebar";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel } from "@/components/ui/sidebar";
-import { CrownIcon, KeyIcon, MonitorSmartphoneIcon, UserIcon } from "lucide-react";
+import { CrownIcon, KeyIcon, ListIcon, MonitorSmartphoneIcon, UserIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 export default function DevicesLayout({ children }: { children: React.ReactNode }) {
@@ -15,7 +15,7 @@ export default function DevicesLayout({ children }: { children: React.ReactNode 
                     <SidebarContent className="bg-[#f5f5f5] p-2 flex flex-col gap-[0px]">
                         <SidebarGroup>
                             <SidebarGroupContent className="flex flex-col gap-[4px]">
-                                <SidebarItem equals Icon={MonitorSmartphoneIcon} label="All Devices" href="/app/devices" />
+                                <SidebarItem equals Icon={ListIcon} label="All Profiles" href="/app/profiles" />
                             </SidebarGroupContent>
                         </SidebarGroup>
                         <SidebarGroup>
