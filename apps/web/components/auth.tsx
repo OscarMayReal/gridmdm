@@ -12,6 +12,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (auth.data?.user) {
             document.cookie = `keystone_session=${auth.data.sessionId}; path=/; max-age=3600; samesite=lax`;
+        } else if (!auth.data?.user && auth.loaded) {
+            window.location.href = process.env.NEXT_PUBLIC_KEYSTONE_URL + "/auth/signin?redirectTo=" + window.location.href;
         }
     }, [auth]);
     return <authContext.Provider value={{ auth, resources }}>{children}</authContext.Provider>

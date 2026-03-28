@@ -1,5 +1,5 @@
 "use client"
-import { DevicesTable } from "@/components/devicestable";
+import { ProfilesTable } from "@/components/tables/profilestable";
 import { usePageContext } from "@/components/pageheader";
 import { ListIcon, MonitorSmartphoneIcon } from "lucide-react";
 import { useEffect } from "react";
@@ -13,6 +13,6 @@ export default function AllDevicesPage() {
         setDescription("Manage all device profiles");
     }, []);
     return <div className="p-4">
-        <DevicesTable />
+        <ProfilesTable />
     </div>
 }

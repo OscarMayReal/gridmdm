@@ -1,7 +1,8 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { flexRender } from "@tanstack/react-table";
+import { Empty } from "./ui/empty";
 
-export function GenericTable({ table, onRowClick }: { table: any, onRowClick?: (row: any) => void }) {
+export function GenericTable({ table, onRowClick, fallback }: { table: any, onRowClick?: (row: any) => void, fallback?: React.ReactNode }) {
     return (
         <Table>
             <TableHeader>
@@ -25,6 +26,13 @@ export function GenericTable({ table, onRowClick }: { table: any, onRowClick?: (
                         ))}
                     </TableRow>
                 ))}
+                {table.getRowModel().rows.length === 0 && fallback && (
+                    <TableRow className="hover:bg-white">
+                        <TableCell colSpan={table.getAllColumns().length} className="h-24 text-center">
+                            {fallback}
+                        </TableCell>
+                    </TableRow>
+                )}
             </TableBody>
         </Table>
     )

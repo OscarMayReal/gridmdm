@@ -4,6 +4,7 @@ import express from "express";
 import keystoneRouter from "./routers/keystone";
 import tenantRouter from "./routers/tenants";
 import deviceRouter from "./routers/devices";
+import profileRouter from "./routers/profiles";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 
@@ -20,6 +21,8 @@ app.use("/api/v1/keystone", keystoneRouter);
 app.use("/api/internal/v1/tenant", tenantRouter);
 
 app.use("/api/v1/devices", deviceRouter);
+
+app.use("/api/v1/profiles", profileRouter);
 
 app.listen(6090, () => {
     console.log("Server running on port 6090");

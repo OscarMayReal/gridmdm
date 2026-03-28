@@ -22,12 +22,12 @@ router.use(async (req, res, next) => {
 });
 
 router.get('/', async (req, res) => {
-    const devices = await listdevices({ tenantId: req.sessionData?.tenantId as string })
+    const devices = await listdevices({ tenantId: req.sessionData?.tenant.id as string })
     res.json(devices)
 })
 
 router.get('/:deviceId', async (req, res) => {
-    const device = await getdevice({ tenantId: req.sessionData?.tenantId as string, deviceId: req.params.deviceId })
+    const device = await getdevice({ tenantId: req.sessionData?.tenant.id as string, deviceId: req.params.deviceId })
     res.json(device)
 })
 

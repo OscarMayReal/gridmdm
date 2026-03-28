@@ -2,9 +2,11 @@
 import { useReactTable, getCoreRowModel, flexRender, getFilteredRowModel, Column, Table } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { Device } from "@repo/database";
-import { GenericTable } from "./generictable";
-import { Input } from "./ui/input";
+import { GenericTable } from "@/components/generictable";
+import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
+import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "../ui/empty";
+import { LaptopMinimalIcon, ListXIcon } from "lucide-react";
 
 export function DevicesTable() {
     const [devices, setDevices] = useState<{ data: Device[], loaded: boolean }>({ data: [], loaded: false });
@@ -79,7 +81,13 @@ export function DevicesTable() {
                 <Filter columnFilterValue={columnFilters} setColumnFilterValue={setColumnFilters} />
             </div>
             <div className="bg-white rounded-md border-1 border-[#e4e4e7] overflow-hidden">
-                <GenericTable table={table} onRowClick={(row) => router.push(`/app/devices/device/${row.original.id}`)} />
+                <GenericTable fallback={<Empty className="flex flex-col gap-2">
+                    <EmptyMedia variant="icon">
+                        <LaptopMinimalIcon />
+                    </EmptyMedia>
+                    <EmptyTitle>No devices found</EmptyTitle>
+                    <EmptyDescription>Devices are used to manage your fleet. Enroll a new device from KeyStone to get started.</EmptyDescription>
+                </Empty>} table={table} onRowClick={(row) => router.push(`/app/devices/device/${row.original.id}`)} />
             </div>
         </>
     )

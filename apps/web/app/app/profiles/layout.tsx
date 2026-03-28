@@ -11,7 +11,7 @@ export default function DevicesLayout({ children }: { children: React.ReactNode 
         <div>
             <PageHeader />
             <div className="flex flex-row h-full w-full">
-                {!pathname.startsWith("/app/devices/device/") && <Sidebar className="static" style={{ backgroundColor: "#f5f5f5" }}>
+                {!pathname.startsWith("/app/profiles/profile/") && <Sidebar className="static" style={{ backgroundColor: "#f5f5f5" }}>
                     <SidebarContent className="bg-[#f5f5f5] p-2 flex flex-col gap-[0px]">
                         <SidebarGroup>
                             <SidebarGroupContent className="flex flex-col gap-[4px]">
