@@ -1,0 +1,55 @@
+"use client"
+import { usePageContext } from "@/components/pageheader";
+import { GroupIcon, InfoIcon, ListIcon, ShieldIcon } from "lucide-react";
+import { createContext, useEffect, use, useState } from "react";
+import { Policy } from "@repo/database";
+import { SidebarItem } from "@/components/sidebar";
+import { SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, Sidebar } from "@/components/ui/sidebar";
+
+export const PolicyContext = createContext<{ policy: Policy | null, loaded: boolean, refresh: () => void }>({
+    policy: null,
+    loaded: false,
+    refresh: () => { }
+});
+
+export default function AllDevicesPage({ params, children }: { params: Promise<{ policyid: string }>, children: React.ReactNode }) {
+    const { setAreaTitle, setIcon, setTitle, setDescription } = usePageContext();
+    const { policyid } = use(params)
+    const [policy, setPolicy] = useState<{ data: Policy, loaded: boolean }>({ data: null, loaded: false });
+    useEffect(() => {
+        if (!policy.loaded) {
+            fetch(`/api/v1/policies/${policyid}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include"
+            }).then(res => res.json()).then(data => {
+                setPolicy({ data, loaded: true });
+            });
+        }
+    }, [policy.loaded]);
+    useEffect(() => {
+        if (policy.loaded) {
+            setTitle(policy.data.name);
+            setDescription("Manage this policy");
+        }
+    }, [policy]);
+    return <PolicyContext.Provider value={{ policy: policy.data, loaded: policy.loaded, refresh: () => setPolicy({ data: null, loaded: false }) }}>
+        <div className="flex-1 flex flex-row">
+            <Sidebar className="static" style={{ backgroundColor: "#f5f5f5" }}>
+                <SidebarContent className="bg-[#f5f5f5] p-2 flex flex-col gap-[0px]">
+                    <SidebarGroup>
+                        <SidebarGroupContent className="flex flex-col gap-[4px]">
+                            <SidebarItem equals Icon={InfoIcon} label="Overview" href={`/app/policies/policy/${policyid}`} />
+                            <SidebarItem equals Icon={ListIcon} label="Blocks" href={`/app/policies/policy/${policyid}/blocks`} />
+                            <SidebarItem equals Icon={GroupIcon} label="Assignments" href={`/app/policies/policy/${policyid}/assignments`} />
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                </SidebarContent>
+            </Sidebar>
+            <div className="flex-1">
+                {children}
+            </div>
+        </div>
+    </PolicyContext.Provider>
+}

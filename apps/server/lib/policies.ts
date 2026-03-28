@@ -1,0 +1,138 @@
+import { prisma } from "@repo/database";
+import type { EnrolmentProfileCreateInput } from "../../../packages/database/generated/prisma/models";
+
+export async function listPolicies({ tenantId }: { tenantId: string }) {
+    const profiles = await prisma.policy.findMany({
+        where: {
+            tenantId: tenantId
+        },
+        include: {
+            tenant: true,
+            assignments: {
+                include: {
+                    group: true
+                }
+            },
+            blocks: true
+        }
+    });
+    return profiles;
+}
+
+export async function getPolicy({ tenantId, policyId }: { tenantId: string, policyId: string }) {
+    const profiles = await prisma.policy.findUnique({
+        where: {
+            id: policyId,
+            tenantId: tenantId
+        },
+        include: {
+            tenant: true,
+            assignments: {
+                include: {
+                    group: true
+                }
+            },
+            blocks: true
+        }
+    });
+    return profiles;
+}
+
+export async function updatePolicy({ tenantId, policyId, data }: { tenantId: string, policyId: string, data: any }) {
+    const profiles = await prisma.policy.update({
+        where: {
+            id: policyId,
+            tenantId: tenantId
+        },
+        data: data
+    });
+    return profiles;
+}
+
+export async function createPolicy({ tenantId, data }: { tenantId: string, data: EnrolmentProfileCreateInput }) {
+    const profiles = await prisma.policy.create({
+        data: {
+            ...data,
+            tenant: {
+                connect: {
+                    id: tenantId
+                }
+            }
+        },
+        include: {
+            tenant: true,
+            assignments: {
+                include: {
+                    group: true
+                }
+            },
+            blocks: true
+        }
+    });
+    return profiles;
+}
+
+export async function deletePolicy({ tenantId, policyId }: { tenantId: string, policyId: string }) {
+    const profiles = await prisma.policy.delete({
+        where: {
+            id: policyId,
+            tenantId: tenantId
+        }
+    });
+    return profiles;
+}
+
+export async function createPolicyBlock({ policyId, data }: { policyId: string, data: any }) {
+    const profileCondition = await prisma.policyBlock.create({
+        data: {
+            policyId: policyId,
+            ...data
+        },
+        include: {
+            policy: true
+        }
+    });
+    return profileCondition;
+}
+
+export async function updatePolicyBlock({ policyId, blockId, data }: { policyId: string, blockId: string, data: any }) {
+    const profileCondition = await prisma.policyBlock.update({
+        where: {
+            id: blockId,
+            policyId: policyId
+        },
+        data: data
+    });
+    return profileCondition;
+}
+
+export async function deletePolicyBlock({ policyId, blockId }: { policyId: string, blockId: string }) {
+    const profileCondition = await prisma.policyBlock.delete({
+        where: {
+            id: blockId,
+            policyId: policyId
+        }
+    });
+    return profileCondition;
+}
+
+export async function createPolicyGroupAssignment({ tenantId, policyId, data }: { tenantId: string, policyId: string, data: any }) {
+    const profileAssignment = await prisma.policyAssignment.create({
+        data: {
+            tenantId: tenantId,
+            policyId: policyId,
+            ...data
+        }
+    });
+    return profileAssignment;
+}
+
+export async function deletePolicyGroupAssignment({ policyId, assignmentId }: { policyId: string, assignmentId: string }) {
+    const profileAssignment = await prisma.policyAssignment.delete({
+        where: {
+            id: assignmentId,
+            policyId: policyId
+        }
+    });
+    return profileAssignment;
+}

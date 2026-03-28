@@ -371,6 +371,8 @@ model PolicyBlock {
   priority    Int             @default(0)
   description String?
   content     Json // Type-specific content
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
   policy Policy @relation(fields: [policyId], references: [id], onDelete: Cascade)
 

@@ -8,6 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback, AvatarBadge, AvatarGroup, AvatarGr
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { LogOutIcon } from "lucide-react";
 import { JSX } from "react";
+import 'lucide-static/font/lucide.css';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     return <AuthProvider><PageContextProvider><div className="fixed top-0 left-0 right-0 bottom-0 w-screen h-screen flex flex-col bg-[#f5f5f5]">
