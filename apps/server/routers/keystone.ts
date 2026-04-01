@@ -53,7 +53,14 @@ router.post('/webhook/device', express.json(), async (req: Request, res: Respons
     return res.status(500).json({ error: 'Internal error' })
   }
 
-  return res.status(200).json({ ok: true })
+  var response = { ok: true }
+  if (req.body.event === 'enroll') {
+    response.token = await prisma.deviceToken.findUnique({ where: { deviceId: req.body.device.id } })
+  }
+
+  console.log(response)
+
+  return res.status(200).json(response)
 })
 
 export default router

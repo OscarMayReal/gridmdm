@@ -6,9 +6,10 @@ import { Policy } from "@repo/database";
 import { SidebarItem } from "@/components/sidebar";
 import { SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, Sidebar } from "@/components/ui/sidebar";
 
-export const PolicyContext = createContext<{ policy: Policy | null, loaded: boolean, refresh: () => void }>({
+export const PolicyContext = createContext<{ policy: Policy | null, loaded: boolean, setPolicy: (policy: Policy) => void, refresh: () => void }>({
     policy: null,
     loaded: false,
+    setPolicy: () => { },
     refresh: () => { }
 });
 
@@ -34,8 +35,8 @@ export default function AllDevicesPage({ params, children }: { params: Promise<{
             setDescription("Manage this policy");
         }
     }, [policy]);
-    return <PolicyContext.Provider value={{ policy: policy.data, loaded: policy.loaded, refresh: () => setPolicy({ data: null, loaded: false }) }}>
-        <div className="flex-1 flex flex-row">
+    return <PolicyContext.Provider value={{ policy: policy.data, loaded: policy.loaded, setPolicy: (policy: Policy) => setPolicy({ data: policy, loaded: true }), refresh: () => setPolicy({ data: null, loaded: false }) }}>
+        <div className="flex-1 flex flex-row max-h-[100%]">
             <Sidebar className="static" style={{ backgroundColor: "#f5f5f5" }}>
                 <SidebarContent className="bg-[#f5f5f5] p-2 flex flex-col gap-[0px]">
                     <SidebarGroup>
@@ -47,7 +48,7 @@ export default function AllDevicesPage({ params, children }: { params: Promise<{
                     </SidebarGroup>
                 </SidebarContent>
             </Sidebar>
-            <div className="flex-1">
+            <div className="flex-1 max-h-[100%]">
                 {children}
             </div>
         </div>

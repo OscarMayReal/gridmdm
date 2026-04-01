@@ -1,4 +1,4 @@
-import { DeviceHardwareType, DeviceSoftwareType, prisma } from '@repo/database'
+import { DeviceHardwareType, DeviceSoftwareType, prisma, type Device } from '@repo/database'
 // import { generateDeviceToken } from '../auth/token'
 
 function generateDeviceToken(): string {
@@ -194,13 +194,13 @@ export async function upsertKeystoneGroup(group: KeyStoneGroup) {
 
 // Replaces device group memberships wholesale.
 // Called on both enrol and groupsmodify events.
-export async function syncDeviceGroups(deviceId: string, groups: KeyStoneGroup[]) {
-  await Promise.all(groups.map(upsertKeystoneGroup))
+export async function syncDeviceGroups(deviceId: string, groups: { group: KeyStoneGroup }[]) {
+  await Promise.all(groups.map((g) => upsertKeystoneGroup(g.group)))
 
   await prisma.$transaction([
     prisma.deviceGroup.deleteMany({ where: { deviceId } }),
     prisma.deviceGroup.createMany({
-      data: groups.map(g => ({ deviceId, groupId: g.id })),
+      data: groups.map(g => ({ deviceId, groupId: g.group.id })),
     }),
   ])
 }

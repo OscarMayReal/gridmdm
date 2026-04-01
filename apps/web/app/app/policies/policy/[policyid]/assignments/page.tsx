@@ -6,17 +6,19 @@ import { Device } from "@repo/database";
 import { PolicyContext } from "../layout";
 import { useContext } from "react";
 import { BlocksEditor } from "@/components/tables/policies/blockseditor";
+import { AssignmentsTable } from "@/components/tables/policies/assignmentstable";
 
 export default function AllDevicesPage() {
     const { setAreaTitle, setIcon, setTitle, setDescription } = usePageContext();
-    const { policy, loaded } = useContext(PolicyContext)
+    const { policy, loaded, setPolicy, refresh } = useContext(PolicyContext)
     useEffect(() => {
         if (loaded) {
-            setAreaTitle("Blocks");
+            setAreaTitle("Assignments");
             setIcon(InfoIcon);
         }
     }, [loaded]);
+    if (!policy) return null;
     return <div className="p-4 max-h-[calc(100vh-153px)] overflow-y-auto">
-        <BlocksEditor />
+        <AssignmentsTable policy={policy} setPolicy={setPolicy} refresh={refresh} />
     </div>
 }

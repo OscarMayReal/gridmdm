@@ -18,6 +18,9 @@ import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, 
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenuButton } from "@/components/ui/sidebar";
 import { PolicyLibrary } from "@/lib/policylibrary";
 import { useDebounce } from "@uidotdev/usehooks";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export function BlocksEditor() {
     const { policy, refresh, loaded } = useContext(PolicyContext)
@@ -72,15 +75,15 @@ function PolicyBlockEditor({ block, refresh }: { block: PolicyBlock, refresh: ()
     const [content, setContent] = useState(block.content)
     const [description, setDescription] = useState(block.description)
     const debouncedDescription = useDebounce(description, 500)
-    const { policy } = useContext(PolicyContext)
+    const { policy, setPolicy } = useContext(PolicyContext)
     useEffect(() => {
         if (debouncedDescription !== block.description) {
-            updatePolicyBlock({ blockId: block.id, data: { description: debouncedDescription }, policyId: policy.id }).then(() => refresh())
+            updatePolicyBlock({ blockId: block.id, data: { description: debouncedDescription }, policyId: policy.id }).then((data: Policy) => setPolicy({ ...policy, blocks: policy.blocks.map((b) => b.id === block.id ? data : b) }))
         }
     }, [debouncedDescription])
     useEffect(() => {
         if (content !== block.content) {
-            updatePolicyBlock({ blockId: block.id, data: { content }, policyId: policy.id }).then(() => refresh())
+            updatePolicyBlock({ blockId: block.id, data: { content }, policyId: policy.id }).then((data: Policy) => setPolicy({ ...policy, blocks: policy.blocks.map((b) => b.id === block.id ? data : b) }))
         }
     }, [content])
     return (
@@ -124,25 +127,96 @@ function PolicyBlockEditor({ block, refresh }: { block: PolicyBlock, refresh: ()
 function SettingItem({ setting, index, setContent, content }: { setting: { key: string, value: any, value_type: string, locked: boolean, description: string }, index: number, setContent: (content: any) => void, content: any }) {
     const settingInfo = PolicyLibrary.categories.find((category) => category.groups.find((group) => group.settings.find((s) => s.key === setting.key)))?.groups.find((group) => group.settings.find((s) => s.key === setting.key))?.settings.find((s) => s.key === setting.key)
     return (
-        <Item key={setting.key} className={(index !== 0 ? "border-t-1 border-t-[#e4e4e7]" : "") + " hover:bg-[#fafafa] rounded-t-none"}>
-            <ItemMedia>
-                <div className={`icon-${settingInfo?.icon}`} style={{ color: "#666666" }}></div>
-            </ItemMedia>
-            <ItemContent>
-                <ItemTitle className="text-[#666666]">{settingInfo?.friendly_name}</ItemTitle>
-                <ItemDescription className="text-[#999999]">{settingInfo?.description}</ItemDescription>
-            </ItemContent>
-            <ItemActions>
-                <Button variant="ghost" className="text-[#666666]" size="sm" onClick={() => {
-                    const newContent = { ...content }
-                    newContent.settings = newContent.settings.filter((s) => s.key !== setting.key)
-                    setContent(newContent)
-                }}>
-                    <XIcon />
-                    Remove
-                </Button>
-            </ItemActions>
-        </Item>
+        <Dialog>
+            <DialogTrigger asChild>
+                <Item key={setting.key} className={(index !== 0 ? "border-t-1 border-t-[#e4e4e7]" : "") + " hover:bg-[#fafafa] rounded-t-none"}>
+                    <ItemMedia>
+                        <div className={`icon-${settingInfo?.icon}`} style={{ color: "#666666" }}></div>
+                    </ItemMedia>
+                    <ItemContent>
+                        <ItemTitle className="text-[#666666]">{settingInfo?.friendly_name}</ItemTitle>
+                        <ItemDescription className="text-[#999999]">{settingInfo?.description}</ItemDescription>
+                    </ItemContent>
+                    <ItemActions>
+                        <Button variant="ghost" className="text-[#666666]" size="sm" onClick={() => {
+                            const newContent = { ...content }
+                            newContent.settings = newContent.settings.filter((s, i) => i !== index)
+                            setContent(newContent)
+                        }}>
+                            <XIcon />
+                            Remove
+                        </Button>
+                    </ItemActions>
+                </Item>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{settingInfo?.friendly_name}</DialogTitle>
+                    <DialogDescription>{settingInfo?.description}</DialogDescription>
+                </DialogHeader>
+                {settingInfo?.enum && (
+                    <Select value={content.settings[index].value} onValueChange={(e) => {
+                        const newContent = { ...content }
+                        newContent.settings[index].value = e
+                        setContent(newContent)
+                    }}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select a value" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {settingInfo.enum.map((value) => (
+                                <SelectItem key={value.value} value={value.value}>{value.label}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
+                {!settingInfo?.enum && settingInfo?.value_type === "string" && (
+                    <Input value={content.settings[index].value} onChange={(e) => {
+                        const newContent = { ...content }
+                        newContent.settings[index].value = e.target.value
+                        setContent(newContent)
+                    }} />
+                )}
+                {!settingInfo?.enum && settingInfo?.value_type === "bool" && (
+                    <Checkbox checked={content.settings[index].value} onCheckedChange={(e) => {
+                        const newContent = { ...content }
+                        newContent.settings[index].value = e
+                        setContent(newContent)
+                    }} />
+                )}
+                {!settingInfo?.enum && (settingInfo?.value_type === "uint32" || settingInfo?.value_type === "int32") && (
+                    <Input type="number" value={content.settings[index].value} onChange={(e) => {
+                        const newContent = { ...content }
+                        newContent.settings[index].value = e.target.value
+                        setContent(newContent)
+                    }} />
+                )}
+                <Field>
+                    <FieldLabel>Lock Setting</FieldLabel>
+                    <FieldDescription>Locked settings cannot be changed by the user.</FieldDescription>
+                    <FieldContent>
+                        <Select value={content.settings[index].locked ? "true" : "false"} onValueChange={(e) => {
+                            const newContent = { ...content }
+                            newContent.settings[index].locked = e === "true"
+                            setContent(newContent)
+                        }}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select a value" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="true">Lock Setting</SelectItem>
+                                <SelectItem value="false">Unlock Setting</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </FieldContent>
+                </Field>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="outline"><XIcon />Close</Button>
+                    </DialogClose>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     )
 }
 

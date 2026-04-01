@@ -13,7 +13,7 @@ import 'lucide-static/font/lucide.css';
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     return <AuthProvider><PageContextProvider><div className="fixed top-0 left-0 right-0 bottom-0 w-screen h-screen flex flex-col bg-[#f5f5f5]">
         <Header />
-        <SidebarProvider className="flex-1 flex flex-row relative">
+        <SidebarProvider className="flex-1 flex flex-row relative max-h-[calc(100vh-50px)]">
             <Sidebar className="absolute" collapsible="icon">
                 <SidebarContent>
                     <SidebarGroup>
@@ -32,7 +32,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </SidebarContent>
                 <SidebarRail />
             </Sidebar>
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 max-h-[calc(100vh-50px)]">{children}</main>
         </SidebarProvider>
     </div></PageContextProvider></AuthProvider>;
 }

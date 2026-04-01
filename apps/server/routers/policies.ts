@@ -66,7 +66,7 @@ router.delete('/:policyId/blocks/:blockId', async (req, res) => {
 })
 
 router.post('/:policyId/assignments', async (req, res) => {
-    const profileAssignment = await createPolicyGroupAssignment({ tenantId: req.sessionData?.tenant.id as string, policyId: req.params.policyId, data: req.body })
+    const profileAssignment = await createPolicyGroupAssignment({ policyId: req.params.policyId, groupId: req.body.groupId })
     res.json(profileAssignment)
 })
 

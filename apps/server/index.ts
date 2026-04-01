@@ -6,6 +6,7 @@ import tenantRouter from "./routers/tenants";
 import deviceRouter from "./routers/devices";
 import profileRouter from "./routers/profiles";
 import policyRouter from "./routers/policies";
+import groupRouter from "./routers/groups";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 
@@ -26,6 +27,8 @@ app.use("/api/v1/devices", deviceRouter);
 app.use("/api/v1/profiles", profileRouter);
 
 app.use("/api/v1/policies", policyRouter);
+
+app.use("/api/v1/groups", groupRouter);
 
 app.listen(6090, () => {
     console.log("Server running on port 6090");

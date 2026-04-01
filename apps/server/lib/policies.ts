@@ -116,12 +116,11 @@ export async function deletePolicyBlock({ policyId, blockId }: { policyId: strin
     return profileCondition;
 }
 
-export async function createPolicyGroupAssignment({ tenantId, policyId, data }: { tenantId: string, policyId: string, data: any }) {
+export async function createPolicyGroupAssignment({ policyId, groupId }: { policyId: string, groupId: string }) {
     const profileAssignment = await prisma.policyAssignment.create({
         data: {
-            tenantId: tenantId,
             policyId: policyId,
-            ...data
+            groupId: groupId
         }
     });
     return profileAssignment;
