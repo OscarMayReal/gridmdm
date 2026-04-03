@@ -1,5 +1,5 @@
 "use client"
-import { ProfilesTable } from "@/components/tables/profilestable";
+import { ProfilesTable } from "@/components/tables/profiles/profilestable";
 import { usePageContext } from "@/components/pageheader";
 import { ListIcon, MonitorSmartphoneIcon } from "lucide-react";
 import { useEffect } from "react";

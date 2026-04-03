@@ -59,7 +59,7 @@ router.delete('/:profileId/conditions/:conditionId', async (req, res) => {
 })
 
 router.post('/:profileId/assignments', async (req, res) => {
-    const profileAssignment = await createProfileGroupAssignment({ tenantId: req.sessionData?.tenant.id as string, profileId: req.params.profileId, data: req.body })
+    const profileAssignment = await createProfileGroupAssignment({ profileId: req.params.profileId, groupId: req.body.groupId })
     res.json(profileAssignment)
 })
 

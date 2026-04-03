@@ -10,7 +10,7 @@ import { ListXIcon, PlusCircleIcon, PlusIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Field, FieldContent, FieldDescription, FieldLabel } from "@/components/ui/field";
-import { Separator } from "../ui/separator";
+import { Separator } from "@/components/ui/separator";
 
 export function ProfilesTable() {
     const [profiles, setProfiles] = useState<{ data: EnrolmentProfile[], loaded: boolean }>({ data: [], loaded: false });

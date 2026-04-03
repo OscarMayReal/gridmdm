@@ -1,4 +1,4 @@
-import { prisma } from "@repo/database";
+import { prisma, type Policy } from "@repo/database";
 import type { EnrolmentProfileCreateInput } from "../../../packages/database/generated/prisma/models";
 
 export async function listPolicies({ tenantId }: { tenantId: string }) {
@@ -134,4 +134,46 @@ export async function deletePolicyGroupAssignment({ policyId, assignmentId }: { 
         }
     });
     return profileAssignment;
+}
+
+export async function GeneratePolicyJson(policyId: string) {
+    const policy = await prisma.policy.findUnique({
+        where: {
+            id: policyId
+        },
+        include: {
+            tenant: true,
+            assignments: {
+                include: {
+                    group: true
+                }
+            },
+            blocks: true,
+            user: true
+        }
+    });
+    if (!policy) {
+        throw new Error("Policy not found");
+    }
+    const json = {
+        "id": policy.id,
+        "version": policy.version,
+        "priority": policy.priority,
+        "description": policy.description,
+
+        "meta": {
+            "author": policy.user.name,
+            "created": policy.createdAt,
+            "modified": policy.updatedAt,
+        },
+
+        "policies": policy.blocks.map((block) => {
+            return {
+                type: block.type,
+                description: block.description,
+                ...block.content,
+            }
+        })
+    }
+    return json;
 }

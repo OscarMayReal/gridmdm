@@ -43,7 +43,7 @@ export default function AllDevicesPage({ params, children }: { params: Promise<{
                         <SidebarGroupContent className="flex flex-col gap-[4px]">
                             <SidebarItem equals Icon={InfoIcon} label="Overview" href={`/app/profiles/profile/${profileid}`} />
                             <SidebarItem equals Icon={ListIcon} label="Conditions" href={`/app/profiles/profile/${profileid}/conditions`} />
-                            <SidebarItem equals Icon={ShieldIcon} label="Policies" href={`/app/profiles/profile/${profileid}/policies`} />
+                            <SidebarItem equals Icon={GroupIcon} label="Assignments" href={`/app/profiles/profile/${profileid}/assignments`} />
                         </SidebarGroupContent>
                     </SidebarGroup>
                 </SidebarContent>

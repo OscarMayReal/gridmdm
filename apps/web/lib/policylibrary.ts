@@ -114,7 +114,7 @@ export const PolicyLibrary = {
                             "key": "/org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-type",
                             "friendly_name": "Sleep Action (AC)",
                             "description": "Action to take when the AC sleep timeout is reached.",
-                            "value_type": "string",
+                            "value_type": "enum",
                             "default_value": "suspend",
                             "enum": [
                                 { "value": "nothing", "label": "Do Nothing" },
@@ -143,7 +143,7 @@ export const PolicyLibrary = {
                             "key": "/org/gnome/settings-daemon/plugins/power/sleep-inactive-battery-type",
                             "friendly_name": "Sleep Action (Battery)",
                             "description": "Action to take when the battery sleep timeout is reached.",
-                            "value_type": "string",
+                            "value_type": "enum",
                             "default_value": "suspend",
                             "enum": [
                                 { "value": "nothing", "label": "Do Nothing" },
@@ -166,7 +166,7 @@ export const PolicyLibrary = {
                             "key": "/org/gnome/settings-daemon/plugins/power/critical-battery-action",
                             "friendly_name": "Critical Battery Action",
                             "description": "Action taken when battery reaches the critical level.",
-                            "value_type": "string",
+                            "value_type": "enum",
                             "default_value": "hibernate",
                             "enum": [
                                 { "value": "nothing", "label": "Do Nothing" },
@@ -186,7 +186,7 @@ export const PolicyLibrary = {
                             "key": "/org/gnome/settings-daemon/plugins/power/power-button-action",
                             "friendly_name": "Power Button Action",
                             "description": "Action when the physical power button is pressed.",
-                            "value_type": "string",
+                            "value_type": "enum",
                             "default_value": "interactive",
                             "enum": [
                                 { "value": "nothing", "label": "Do Nothing" },
@@ -201,7 +201,7 @@ export const PolicyLibrary = {
                             "key": "/org/gnome/settings-daemon/plugins/power/lid-close-ac-action",
                             "friendly_name": "Lid Close Action (AC)",
                             "description": "Action when the laptop lid is closed on AC power.",
-                            "value_type": "string",
+                            "value_type": "enum",
                             "default_value": "suspend",
                             "enum": [
                                 { "value": "nothing", "label": "Do Nothing" },
@@ -215,7 +215,7 @@ export const PolicyLibrary = {
                             "key": "/org/gnome/settings-daemon/plugins/power/lid-close-battery-action",
                             "friendly_name": "Lid Close Action (Battery)",
                             "description": "Action when the laptop lid is closed on battery power.",
-                            "value_type": "string",
+                            "value_type": "enum",
                             "default_value": "suspend",
                             "enum": [
                                 { "value": "nothing", "label": "Do Nothing" },
@@ -496,7 +496,7 @@ export const PolicyLibrary = {
                             "key": "/org/gnome/desktop/background/picture-options",
                             "friendly_name": "Wallpaper Scaling",
                             "description": "How the wallpaper image is scaled to fit the screen.",
-                            "value_type": "string",
+                            "value_type": "enum",
                             "default_value": "zoom",
                             "enum": [
                                 { "value": "none", "label": "No Scaling (Tiled)" },
@@ -555,7 +555,7 @@ export const PolicyLibrary = {
                             "key": "/org/gnome/desktop/interface/color-scheme",
                             "friendly_name": "Colour Scheme",
                             "description": "Preferred colour scheme. Applications that support it will follow this setting.",
-                            "value_type": "string",
+                            "value_type": "enum",
                             "default_value": "default",
                             "enum": [
                                 { "value": "default", "label": "Light (Default)" },
@@ -568,7 +568,7 @@ export const PolicyLibrary = {
                             "key": "/org/gnome/desktop/interface/accent-color",
                             "friendly_name": "Accent Colour",
                             "description": "Accent colour used throughout the desktop for highlights and interactive elements.",
-                            "value_type": "string",
+                            "value_type": "enum",
                             "default_value": "blue",
                             "enum": [
                                 { "value": "blue", "label": "Blue" },
@@ -643,7 +643,7 @@ export const PolicyLibrary = {
                             "key": "/org/gnome/desktop/interface/clock-format",
                             "friendly_name": "Clock Format",
                             "description": "Whether the clock uses 12-hour or 24-hour format.",
-                            "value_type": "string",
+                            "value_type": "enum",
                             "default_value": "24h",
                             "enum": [
                                 { "value": "12h", "label": "12-Hour (AM/PM)" },
@@ -721,7 +721,7 @@ export const PolicyLibrary = {
                             "key": "/org/gnome/desktop/peripherals/mouse/accel-profile",
                             "friendly_name": "Mouse Acceleration Profile",
                             "description": "The pointer acceleration profile applied to mouse movement.",
-                            "value_type": "string",
+                            "value_type": "enum",
                             "default_value": "default",
                             "enum": [
                                 { "value": "default", "label": "Default (Adaptive)" },
@@ -770,7 +770,7 @@ export const PolicyLibrary = {
                             "key": "/org/gnome/desktop/peripherals/touchpad/click-method",
                             "friendly_name": "Touchpad Click Method",
                             "description": "How clicks are registered on the touchpad surface.",
-                            "value_type": "string",
+                            "value_type": "enum",
                             "default_value": "fingers",
                             "enum": [
                                 { "value": "default", "label": "Default" },
@@ -1071,7 +1071,7 @@ export const PolicyLibrary = {
                             "key": "/org/gnome/desktop/a11y/mouse/dwell-mode",
                             "friendly_name": "Dwell Click Mode",
                             "description": "Whether dwell click acts on the current pointer position or uses a gesture.",
-                            "value_type": "string",
+                            "value_type": "enum",
                             "default_value": "window",
                             "enum": [
                                 { "value": "window", "label": "Use On-Screen Window" },

@@ -141,9 +141,11 @@ model KeyStoneGroup {
   devices DeviceGroup[]
 
   // Enrolment profiles that match on this group
-  profileConditions EnrolmentProfileCondition[]
+  profileConditions  EnrolmentProfileCondition[]
   // Policies assigned to this group
-  policyAssignments PolicyAssignment[]
+  policyAssignments  PolicyAssignment[]
+  // Enrolment profiles assigned to this group
+  profileAssignments EnrolmentProfileGroupAssignment[]
 
   @@map("keystone_groups")
 }
@@ -161,6 +163,7 @@ model KeyStoneUser {
   assignedDevices Device[]     @relation("AssignedUser")
   appRequests     AppRequest[]
   enrolledDevices Device[]     @relation("EnrolledUser")
+  createdPolicies Policy[]
 
   @@map("keystone_users")
 }
@@ -321,6 +324,7 @@ model EnrolmentProfileGroupAssignment {
   groupId   String // KeyStone group_id to assign device to
 
   profile EnrolmentProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  group   KeyStoneGroup    @relation(fields: [groupId], references: [id])
 
   @@map("enrolment_profile_group_assignments")
 }
@@ -330,16 +334,17 @@ model EnrolmentProfileGroupAssignment {
 // ============================================================
 
 model Policy {
-  id          String   @id @default(uuid())
+  id          String       @id @default(uuid())
   tenantId    String
   name        String
   description String?
-  version     String   @default("1.0.0")
-  priority    Int      @default(100)
-  enabled     Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  version     String       @default("1.0.0")
+  priority    Int          @default(100)
+  enabled     Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   createdBy   String // KeyStone user ID
+  user        KeyStoneUser @relation(fields: [createdBy], references: [id])
 
   tenant      Tenant             @relation(fields: [tenantId], references: [id])
   assignments PolicyAssignment[]

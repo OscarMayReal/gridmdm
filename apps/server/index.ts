@@ -7,8 +7,10 @@ import deviceRouter from "./routers/devices";
 import profileRouter from "./routers/profiles";
 import policyRouter from "./routers/policies";
 import groupRouter from "./routers/groups";
+import clientRouter from "./routers/client";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import { GeneratePolicyJson } from "./lib/policies";
 
 dotenv.config();
 
@@ -21,6 +23,8 @@ app.use(express.json());
 app.use("/api/v1/keystone", keystoneRouter);
 
 app.use("/api/internal/v1/tenant", tenantRouter);
+
+app.use("/api/internal/v1/client", clientRouter);
 
 app.use("/api/v1/devices", deviceRouter);
 

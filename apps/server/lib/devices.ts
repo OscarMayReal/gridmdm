@@ -35,7 +35,8 @@ export async function getdevice({ tenantId, deviceId }: { tenantId: string, devi
             user: true,
             installedApps: true,
             enrolledBy: true,
-            tenant: true
+            tenant: true,
+            token: true
         }
     });
     return device;

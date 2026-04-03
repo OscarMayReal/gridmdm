@@ -34,7 +34,11 @@ export async function getProfile({ tenantId, profileId }: { tenantId: string, pr
             },
             tenant: true,
             devices: true,
-            assignments: true
+            assignments: {
+                include: {
+                    group: true
+                }
+            }
         }
     });
     return profiles;
@@ -110,12 +114,15 @@ export async function deleteProfileCondition({ profileId, conditionId }: { profi
     return profileCondition;
 }
 
-export async function createProfileGroupAssignment({ tenantId, profileId, data }: { tenantId: string, profileId: string, data: any }) {
+export async function createProfileGroupAssignment({ profileId, groupId }: { profileId: string, groupId: string }) {
     const profileAssignment = await prisma.enrolmentProfileGroupAssignment.create({
         data: {
-            tenantId: tenantId,
             profileId: profileId,
-            ...data
+            groupId: groupId
+        },
+        include: {
+            group: true,
+            profile: true
         }
     });
     return profileAssignment;
