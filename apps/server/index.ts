@@ -34,6 +34,30 @@ app.use("/api/v1/policies", policyRouter);
 
 app.use("/api/v1/groups", groupRouter);
 
+app.get("/api/v1/flathubproxy/*locpath", async (req, res) => {
+    console.log("https://flathub.org/api/v2/" + req.params.locpath.join("/"));
+    const response = await fetch("https://flathub.org/api/v2/" + req.params.locpath.join("/"), {
+        headers: {
+            "User-Agent": "chrome/120.0.0.0"
+        },
+    });
+    res.send(await response.json());
+});
+
+app.post("/api/v1/flathubproxy/*locpath", async (req, res) => {
+    console.log("https://flathub.org/api/v2/" + req.params.locpath.join("/"));
+    const response = await fetch("https://flathub.org/api/v2/" + req.params.locpath.join("/"), {
+        headers: {
+            "User-Agent": "chrome/120.0.0.0",
+            "Content-Type": "application/json",
+            "accept": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify(req.body),
+    });
+    res.send(await response.json());
+});
+
 app.listen(6090, () => {
     console.log("Server running on port 6090");
 })

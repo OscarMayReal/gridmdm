@@ -124,6 +124,7 @@ model Tenant {
   enrolmentProfiles EnrolmentProfile[]
   policies          Policy[]
   appPolicies       AppPolicy[]
+  apps              App[]
   enrollmentToken   String
 
   @@map("organisations")
@@ -141,11 +142,13 @@ model KeyStoneGroup {
   devices DeviceGroup[]
 
   // Enrolment profiles that match on this group
-  profileConditions  EnrolmentProfileCondition[]
+  profileConditions    EnrolmentProfileCondition[]
   // Policies assigned to this group
-  policyAssignments  PolicyAssignment[]
+  policyAssignments    PolicyAssignment[]
   // Enrolment profiles assigned to this group
-  profileAssignments EnrolmentProfileGroupAssignment[]
+  profileAssignments   EnrolmentProfileGroupAssignment[]
+  // App policies assigned to this group
+  appPolicyAssignments AppPolicyAssignment[]
 
   @@map("keystone_groups")
 }
@@ -414,30 +417,37 @@ model AppPolicyAssignment {
   groupId     String? // null = all devices in org
   priority    Int     @default(100)
 
-  appPolicy AppPolicy @relation(fields: [appPolicyId], references: [id], onDelete: Cascade)
+  appPolicy AppPolicy      @relation(fields: [appPolicyId], references: [id], onDelete: Cascade)
+  group     KeyStoneGroup? @relation(fields: [groupId], references: [id])
 
   @@map("app_policy_assignments")
 }
 
+model App {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  version     String   @default("1.0.0")
+  priority    Int      @default(100)
+  rule        AppRule  @default(OPTIONAL)
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String // KeyStone user ID
+
+  tenant      Tenant           @relation(fields: [tenantId], references: [id])
+  appPolicies AppPolicyEntry[]
+
+  @@map("apps")
+}
+
 // A single app entry within an app policy.
 model AppPolicyEntry {
-  id                String    @id @default(uuid())
-  appPolicyId       String
-  appId             String // e.g. org.mozilla.firefox
-  source            AppSource
-  remote            String? // Flatpak remote name
-  remoteUrl         String? // For private remotes
-  rule              AppRule
-  autoUpdate        Boolean   @default(true)
-  userRemovable     Boolean   @default(true)
-  allowUserRequest  Boolean   @default(false) // For ALLOWED apps — can user request?
-  requireReason     Boolean   @default(false)
-  removeIfPresent   Boolean   @default(false) // For BLOCKED — remove if already installed
-  blockReason       String?
-  versionConstraint String? // e.g. ">=120.0"
-  matchType         String    @default("exact") // exact or glob
-
-  appPolicy AppPolicy @relation(fields: [appPolicyId], references: [id], onDelete: Cascade)
+  appPolicyId String
+  appId       String // e.g. org.mozilla.firefox
+  app         App       @relation(fields: [appId], references: [id], onDelete: Cascade)
+  appPolicy   AppPolicy @relation(fields: [appPolicyId], references: [id], onDelete: Cascade)
 
   @@unique([appPolicyId, appId])
   @@map("app_policy_entries")
