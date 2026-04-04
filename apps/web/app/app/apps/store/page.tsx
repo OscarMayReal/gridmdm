@@ -1,14 +1,18 @@
 "use client"
 import { ProfilesTable } from "@/components/tables/profiles/profilestable";
 import { usePageContext } from "@/components/pageheader";
-import { CrownIcon, LayoutGridIcon, ListIcon, MonitorSmartphoneIcon } from "lucide-react";
+import { ArrowDownIcon, ArrowLeftIcon, ArrowRightIcon, CrownIcon, LayoutGridIcon, ListIcon, MonitorSmartphoneIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { useWindowSize } from "@uidotdev/usehooks";
+import { Button } from "@/components/ui/button";
+import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item";
+import { AppDialog, AppItem, useAppsOfTheWeek, useCatagories, useCategory, useTrendingApps } from "@/components/apps";
 
 export default function AllDevicesPage() {
     const { setAreaTitle, setIcon, setTitle, setDescription } = usePageContext();
     const appsOfTheWeek = useAppsOfTheWeek();
+    const categories = useCatagories();
     useEffect(() => {
         console.log(appsOfTheWeek);
     }, [appsOfTheWeek]);
@@ -19,8 +23,8 @@ export default function AllDevicesPage() {
         setDescription("Browse and install apps from the store");
     }, []);
     const { width } = useWindowSize();
-    return <div className="flex flex-col max-w-full">
-        <div className="max-w-[1280px] mx-auto px-15 w-full">
+    return <div className="flex flex-col max-w-full max-h-[calc(100vh-153px)] overflow-y-auto">
+        <div className="max-w-[1280px] mx-auto px-8 w-full">
             <div className="flex flex-row items-center gap-2 py-8">
                 <img src="/flathub.svg" className="h-7" alt="Flathub" />
             </div>
@@ -38,7 +42,7 @@ export default function AllDevicesPage() {
                                         <p className="text-sm text-black text-center">{app.app.summary}</p>
                                     </div>
                                 </div>
-                                {width > 1899 ? <img className="rounded-lg" style={{ maxWidth: "800px", height: "fit-content" }} src={app.app.screenshots[0].sizes[0].src} alt={app.app.name} /> : null}
+                                {width > 1799 ? <img className="rounded-lg" style={{ maxWidth: "800px", height: "fit-content" }} src={app.app.screenshots[0].sizes[0].src} alt={app.app.name} /> : null}
                             </div>
                         </CarouselItem>
                     ))}
@@ -46,34 +50,43 @@ export default function AllDevicesPage() {
                 <CarouselPrevious className="ml-17" />
                 <CarouselNext className="mr-17" />
             </Carousel>
+            <TrendingSection />
+            {categories.loaded && categories.data.map((category) => (
+                <CategorySection key={category} category={category} />
+            ))}
+            <div className="h-10" />
         </div>
     </div>
 }
 
-function useAppsOfTheWeek() {
-    const [appsOfTheWeek, setAppsOfTheWeek] = useState({ loaded: false, apps: [] });
-    useEffect(() => {
-        fetch("/api/v1/flathubproxy/app-picks/apps-of-the-week/" + new Date().getFullYear() + "-" + (new Date().getMonth() + 1).toString().padStart(2, "0") + "-" + new Date().getDate().toString().padStart(2, "0")).then((res) => res.json()).then(async (data) => {
-            const apps = [];
-            for (const app of data.apps) {
-                apps.push({ aotw: app, app: await getAppById(app.app_id) });
-            }
-            setAppsOfTheWeek({ loaded: true, apps: apps });
-        });
-    }, []);
-    return appsOfTheWeek;
+function TrendingSection() {
+    const [isShowingAll, setIsShowingAll] = useState(false);
+    const trendingApps = useTrendingApps();
+    return <>
+        <div className="flex flex-row items-center gap-2 pt-8 pb-4">
+            <h1 className="text-xl font-bold text-black">Trending Apps</h1>
+            <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setIsShowingAll(!isShowingAll)}>{isShowingAll ? "Show Less" : "View All"}<ArrowDownIcon /></Button>
+        </div>
+        <div className="grid grid-cols-4 gap-4">
+            {trendingApps.loaded && trendingApps.data.hits.slice(0, isShowingAll ? trendingApps.data.hits.length : 8).map((app) => (
+                <AppDialog key={app.id} app={app} />
+            ))}
+        </div>
+    </>
 }
 
-function useAppById(id: string) {
-    const [app, setApp] = useState({ loaded: false, app: null });
-    useEffect(() => {
-        fetch("/api/v1/flathubproxy/appstream/" + id).then((res) => res.json()).then((data) => {
-            setApp({ loaded: true, app: data });
-        });
-    }, [id]);
-    return app;
-}
-
-function getAppById(id: string) {
-    return fetch("/api/v1/flathubproxy/appstream/" + id).then((res) => res.json());
+function CategorySection({ category }: { category: string }) {
+    const [isShowingAll, setIsShowingAll] = useState(false);
+    const categoryApps = useCategory({ category });
+    return <>
+        <div className="flex flex-row items-center gap-2 pt-8 pb-4">
+            <h1 className="text-xl font-bold text-black">{category.charAt(0).toUpperCase() + category.slice(1)}</h1>
+            <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setIsShowingAll(!isShowingAll)}>{isShowingAll ? "Show Less" : "View All"}<ArrowDownIcon /></Button>
+        </div>
+        <div className="grid grid-cols-4 gap-4">
+            {categoryApps.loaded && categoryApps.data.hits.slice(0, isShowingAll ? categoryApps.data.hits.length : 8).map((app) => (
+                <AppDialog key={app.id} app={app} />
+            ))}
+        </div>
+    </>
 }

@@ -29,7 +29,7 @@ export default function DevicesLayout({ children }: { children: React.ReactNode 
                         </SidebarGroup>
                     </SidebarContent>
                 </Sidebar>}
-                <div className="flex-1">
+                <div className="flex-1 max-h-[100%]">
                     {children}
                 </div>
             </div>
