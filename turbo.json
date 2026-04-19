@@ -5,6 +5,11 @@
     "DATABASE_URL"
   ],
   "tasks": {
+    "start": {
+      "dependsOn": [
+        "^start"
+      ]
+    },
     "build": {
       "dependsOn": [
         "^build"

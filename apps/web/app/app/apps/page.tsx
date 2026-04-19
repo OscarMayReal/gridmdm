@@ -3,6 +3,7 @@ import { ProfilesTable } from "@/components/tables/profiles/profilestable";
 import { usePageContext } from "@/components/pageheader";
 import { LayoutGridIcon, ListIcon, MonitorSmartphoneIcon } from "lucide-react";
 import { useEffect } from "react";
+import { AppsTable } from "@/components/tables/apps/appstable";
 
 export default function AllDevicesPage() {
     const { setAreaTitle, setIcon, setTitle, setDescription } = usePageContext();
@@ -13,6 +14,6 @@ export default function AllDevicesPage() {
         setDescription("Manage and deploy your apps");
     }, []);
     return <div className="p-4">
-        <ProfilesTable />
+        <AppsTable />
     </div>
 }

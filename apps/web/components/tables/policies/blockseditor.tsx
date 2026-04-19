@@ -32,7 +32,7 @@ export function BlocksEditor() {
     return (
         <div className="flex flex-col gap-[10px]">
             {policy?.blocks.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()).map((block) => (
-                <PolicyBlockEditor block={block} refresh={refresh} />
+                <PolicyBlockEditor key={block.id} block={block} refresh={refresh} />
             ))}
             {policy?.blocks.length === 0 && (
                 <Empty className="flex flex-col gap-2" style={{ paddingBottom: 0 }}>
@@ -272,6 +272,10 @@ function SettingsLibraryDialog({ content, setContent }: { content: any, setConte
     const [open, setOpen] = useState(false);
     return (
         <Dialog open={open} onOpenChange={setOpen}>
+            <DialogHeader className="hidden">
+                <DialogTitle>Add Setting from Library</DialogTitle>
+                <DialogDescription>Add a setting from the library to the policy.</DialogDescription>
+            </DialogHeader>
             <DialogTrigger asChild>
                 <Button variant="outline" className="text-[#666666]">
                     <PlusIcon />
@@ -297,7 +301,7 @@ function SettingsLibraryDialog({ content, setContent }: { content: any, setConte
                         <div className="text-md text-[#999999]">{PolicyLibrary.categories.find((category) => category.id === selectedCategory)?.description}</div>
                     </div>
                     {PolicyLibrary.categories.find((category) => category.id === selectedCategory)?.groups.map((group) => (
-                        <div className="flex flex-col gap-[10px]">
+                        <div key={group.id} className="flex flex-col gap-[10px]">
                             <div className="text-sm text-[#999999]">{group.name}</div>
                             <ItemGroup className="bg-white border-1 border-[#e4e4e7] rounded-lg overflow-y-hidden">
                                 {group.settings.map((setting, index) => (

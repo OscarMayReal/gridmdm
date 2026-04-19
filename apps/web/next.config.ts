@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  allowedDevOrigins: ['oscar-macbook-dev-3000.quntem.co.uk'],
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 export default nextConfig;

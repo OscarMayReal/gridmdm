@@ -428,6 +428,7 @@ model App {
   tenantId    String
   name        String
   description String?
+  appId       String
   version     String   @default("1.0.0")
   priority    Int      @default(100)
   rule        AppRule  @default(OPTIONAL)
@@ -445,7 +446,7 @@ model App {
 // A single app entry within an app policy.
 model AppPolicyEntry {
   appPolicyId String
-  appId       String // e.g. org.mozilla.firefox
+  appId       String
   app         App       @relation(fields: [appId], references: [id], onDelete: Cascade)
   appPolicy   AppPolicy @relation(fields: [appPolicyId], references: [id], onDelete: Cascade)
 

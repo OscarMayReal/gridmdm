@@ -63,6 +63,7 @@ function UserItem({ user, Extra, onClick }: { user: any, Extra?: JSX.Element, on
 
 function HeaderUser() {
     const { auth } = useAuthContext();
+    if (!auth.loaded || !auth.data?.user) return null;
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>

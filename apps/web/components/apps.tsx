@@ -1,7 +1,10 @@
 "use client"
 import { useState, useEffect } from "react";
-import { DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, Dialog } from "./ui/dialog";
+import { DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, Dialog, DialogClose, DialogFooter } from "./ui/dialog";
 import { Item, ItemMedia, ItemContent, ItemTitle, ItemDescription } from "./ui/item";
+import { Separator } from "./ui/separator";
+import { Button } from "./ui/button";
+import { PlusIcon, XIcon } from "lucide-react";
 
 export function AppItem({ app, onClick }: { app: any, onClick: () => void }) {
     return <Item variant={"outline"} className="bg-white hover:cursor-pointer hover:bg-neutral-50" onClick={onClick}>
@@ -21,7 +24,7 @@ export function AppDialog({ app }: { app: any }) {
         <DialogTrigger asChild>
             <AppItem onClick={() => setOpen(true)} app={app} />
         </DialogTrigger>
-        <DialogContent className="max-w-[90vw] h-[90vh] w-[90vw] min-w-[90vw] min-h-[90vh] p-0 flex flex-col">
+        <DialogContent className="max-w-[90vw] h-[90vh] w-[90vw] min-w-[90vw] min-h-[90vh] gap-0 p-0 flex flex-col">
             <DialogHeader className="p-6 h-[90px] flex flex-row items-center gap-3">
                 <img src={app.icon} style={{ width: "40px", height: "40px" }} alt={app.name} />
                 <div className="flex flex-col gap-1">
@@ -31,6 +34,7 @@ export function AppDialog({ app }: { app: any }) {
                     </DialogDescription>
                 </div>
             </DialogHeader>
+            <Separator />
             {open && <AppDialogContent appId={app.id.replaceAll("_", ".")} />}
         </DialogContent>
     </Dialog>
@@ -39,17 +43,34 @@ export function AppDialog({ app }: { app: any }) {
 function AppDialogContent({ appId }: { appId: string }) {
     const app = useAppById(appId);
     if (!app.loaded) return null;
-    return <div className="flex flex-col">
-        <div className="px-6 pb-3 text-lg font-medium text-[#999999]">
+    return <div className="max-h-full overflow-y-auto">
+        <div className="flex flex-row gap-3 max-w-full overflow-x-auto p-6 pb-0 pt-6 h-fit">
+            <Button onClick={() => {
+                fetch("/api/v1/apps/acquireapp", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        appId: app.app.id,
+                        name: app.app.name,
+                        description: app.app.summary,
+                        version: app.app.version,
+                    }),
+                    credentials: "include"
+                });
+            }}><PlusIcon />Acquire</Button>
+        </div>
+        <div className="px-6 pb-3 pt-6 text-lg font-medium text-[#999999]">
             Description
         </div>
         <div className="px-6 pb-6 text-md font-regular text-[#666666]" dangerouslySetInnerHTML={{ __html: app.app.description }} />
         <div className="px-6 pb-3 text-lg font-medium text-[#999999]">
             Screenshots
         </div>
-        {app.loaded && <div className="flex flex-row gap-3 max-w-full overflow-x-auto p-6 pt-0">
+        {app.loaded && <div className="flex flex-row gap-3 max-w-full overflow-x-auto p-6 pt-0 h-fit">
             {app.app.screenshots && app.app.screenshots.length > 0 ? app.app.screenshots.map((screenshot: any) => (
-                <img src={screenshot.sizes[0].src} className="max-h-[450px] w-fit" />
+                <img src={screenshot.sizes[0].src} className="max-h-[450px] min-h-[450px] h-[450px] w-fit" />
             )) : <div className="flex flex-col items-center justify-center w-full h-full">
                 <p className="text-lg font-medium text-[#666666]">No screenshots available</p>
             </div>}

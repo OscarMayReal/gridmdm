@@ -33,7 +33,7 @@ export default function AllDevicesPage() {
             }} className="max-w-[1280px] w-full mx-auto">
                 <CarouselContent>
                     {appsOfTheWeek.loaded && appsOfTheWeek.apps.map((app) => (
-                        <CarouselItem key={app.aotw.id}>
+                        <CarouselItem key={app.app.id}>
                             <div className={`max-h-[352px] w-full h-[352px] rounded-lg overflow-hidden p-0 m-0 flex flex-row`} style={{ backgroundColor: app.app.branding[0].value }}>
                                 <div className="h-[352px] w-full flex flex-col items-center justify-center gap-2">
                                     <img src={app.app.icons[0].url} alt={app.app.name} />

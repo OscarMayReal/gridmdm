@@ -336,7 +336,7 @@ export async function handleGroupsModify(device: KeyStoneDevice): Promise<void> 
 
   await prisma.device.update({
     where: { id: device.id },
-    data: { assignedUserId: device.user?.id ?? null },
+    data: { assignedUserId: device.user?.id ?? null, displayName: device.displayName },
   })
 
   await prisma.command.create({
