@@ -1,5 +1,5 @@
 import { prisma, type Policy } from "@repo/database";
-import type { EnrolmentProfileCreateInput } from "../../../packages/database/generated/prisma/models";
+import type { PolicyCreateInput } from "../../../packages/database/generated/prisma/models";
 
 export async function listPolicies({ tenantId }: { tenantId: string }) {
     const profiles = await prisma.policy.findMany({
@@ -49,13 +49,21 @@ export async function updatePolicy({ tenantId, policyId, data }: { tenantId: str
     return profiles;
 }
 
-export async function createPolicy({ tenantId, data }: { tenantId: string, data: EnrolmentProfileCreateInput }) {
-    const profiles = await prisma.policy.create({
+export async function createPolicy({ tenantId, priority, description, name, createdBy }: { tenantId: string, priority: number, description: string, name: string, createdBy: string }) {
+    const policy = await prisma.policy.create({
         data: {
-            ...data,
+            priority: priority,
+            description: description,
+            name: name,
             tenant: {
                 connect: {
                     id: tenantId
+                }
+            },
+            // createdBy: createdBy,
+            user: {
+                connect: {
+                    id: createdBy
                 }
             }
         },
@@ -69,7 +77,7 @@ export async function createPolicy({ tenantId, data }: { tenantId: string, data:
             blocks: true
         }
     });
-    return profiles;
+    return policy;
 }
 
 export async function deletePolicy({ tenantId, policyId }: { tenantId: string, policyId: string }) {

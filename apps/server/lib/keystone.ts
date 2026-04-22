@@ -180,6 +180,7 @@ export async function upsertKeystoneUser(user: KeyStoneUser) {
 }
 
 export async function upsertKeystoneGroup(group: KeyStoneGroup) {
+  console.log(`[upsertKeystoneGroup] upserting group ${group.id}`, group)
   return prisma.keyStoneGroup.upsert({
     where: { id: group.id },
     update: { name: group.name, groupname: group.groupname },
@@ -195,6 +196,7 @@ export async function upsertKeystoneGroup(group: KeyStoneGroup) {
 // Replaces device group memberships wholesale.
 // Called on both enrol and groupsmodify events.
 export async function syncDeviceGroups(deviceId: string, groups: { group: KeyStoneGroup }[]) {
+  console.log(`[syncDeviceGroups] syncing groups for device ${deviceId}`, groups)
   await Promise.all(groups.map((g) => upsertKeystoneGroup(g.group)))
 
   await prisma.$transaction([
@@ -242,12 +244,15 @@ export async function handleEnroll(device: KeyStoneDevice): Promise<void> {
     )
   }
 
+  console.log(`[handleEnroll] upserting enrolled by ${device.id}`, device)
   if (device.enrolledBy) await upsertKeystoneUser(device.enrolledBy)
+  console.log(`[handleEnroll] upserting assigned user ${device.id}`, device)
   if (device.user) await upsertKeystoneUser(device.user)
-
+    
   const groupIds = device.groups.map(g => g.id)
   const profileId = await resolveEnrolmentProfile(tenantId, groupIds)
 
+  console.log(`[handleEnroll] upserting device ${device.id}`, device)
   await prisma.device.upsert({
     where: { id: device.id },
     update: {
@@ -279,6 +284,7 @@ export async function handleEnroll(device: KeyStoneDevice): Promise<void> {
     },
   })
 
+  console.log(`[handleEnroll] starting sync device groups for device ${device.id}`, groupIds)
   await syncDeviceGroups(device.id, device.groups)
 
   const existingToken = await prisma.deviceToken.findUnique({

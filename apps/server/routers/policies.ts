@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { getdevice, listdevices } from '../lib/devices'
 import { VerifySession } from '../keystone'
 import { createPolicy, createPolicyBlock, createPolicyGroupAssignment, deletePolicy, deletePolicyBlock, deletePolicyGroupAssignment, getPolicy, listPolicies, updatePolicy, updatePolicyBlock } from '../lib/policies';
+import { upsertKeystoneUser } from '../lib/keystone';
 
 const router = Router()
 
@@ -15,6 +16,7 @@ router.use(async (req, res, next) => {
             appSecret: process.env.APP_SECRET!
         });
         req.sessionData = sessionData;
+        upsertKeystoneUser(sessionData.user)
         next();
     } catch (error) {
         console.log(error);
@@ -33,10 +35,7 @@ router.get('/:policyId', async (req, res) => {
 })
 
 router.post('/', async (req, res) => {
-    console.log(req.body)
-    var data = req.body
-    data.createdBy = req.sessionData?.user.id as string
-    const profile = await createPolicy({ tenantId: req.sessionData?.tenant.id as string, data: data })
+    const profile = await createPolicy({ tenantId: req.sessionData?.tenant.id as string, priority: req.body.priority, description: req.body.description, name: req.body.name, createdBy: req.sessionData?.user.id as string })
     res.json(profile)
 })
 

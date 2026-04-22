@@ -119,8 +119,44 @@ function PolicyBlockEditor({ block, refresh }: { block: PolicyBlock, refresh: ()
                         </div>
                     </>
                 )}
+                {block.type === "FILE" && (
+                    <>
+                        {content.files.length > 0 && <ItemGroup className="flex flex-col border-1 border-[#e4e4e7] rounded-lg overflow-y-hidden mb-4">
+                            {content.files.map((file, index) => (
+                                <FileItem key={file.path} file={file} index={index} setContent={setContent} content={content} />
+                            ))}
+                        </ItemGroup>}
+                        <div className="flex flex-row justify-center mt-2">
+                            <FileCreateDialog content={content} setContent={setContent} />
+                        </div>
+                    </>
+                )}
             </CardContent>
         </Card>
+    )
+}
+
+function FileCreateDialog({ content, setContent }: { content: any, setContent: (content: any) => void }) {
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="outline" className="text-[#666666]"><PlusIcon />Add File</Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Add File</DialogTitle>
+                    <DialogDescription>Add a file to the policy</DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="outline"><XIcon />Cancel</Button>
+                    </DialogClose>
+                    <DialogClose asChild>
+                        <Button variant="outline"><PlusIcon />Add File</Button>
+                    </DialogClose>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     )
 }
 

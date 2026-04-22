@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { getdevice, listdevices } from '../lib/devices'
 import { VerifySession } from '../keystone'
 import { createProfile, createProfileCondition, createProfileGroupAssignment, deleteProfile, deleteProfileCondition, deleteProfileGroupAssignment, getProfile, listProfiles, updateProfile } from '../lib/profiles';
+import { upsertKeystoneUser } from '../lib/keystone';
 
 const router = Router()
 
@@ -15,6 +16,7 @@ router.use(async (req, res, next) => {
             appSecret: process.env.APP_SECRET!
         });
         req.sessionData = sessionData;
+        upsertKeystoneUser(sessionData.user)
         next();
     } catch (error) {
         console.log(error);

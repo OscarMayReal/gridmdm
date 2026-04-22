@@ -3,6 +3,7 @@ import { getManifest } from "../lib/client";
 import { getdevice } from "../lib/devices";
 import { createApp, listTenantApps } from "../lib/apps";
 import { VerifySession } from "../keystone";
+import { upsertKeystoneUser } from "../lib/keystone";
 
 const router = Router();
 
@@ -15,6 +16,7 @@ router.use(async (req, res, next) => {
             appSecret: process.env.APP_SECRET!
         });
         req.sessionData = sessionData;
+        upsertKeystoneUser(sessionData.user)
         next();
     } catch (error) {
         console.log(error);

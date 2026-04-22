@@ -58,6 +58,9 @@ function Filter({ columnFilterValue, setColumnFilterValue }: { columnFilterValue
 
 function CreatePolicyDialog({ policy, onCreate }: { policy: Policy, onCreate: (policy: Policy) => void }) {
     const [groupId, setGroupId] = useState("");
+    useEffect(() => {
+        console.log(groupId)
+    }, [groupId]);
     const [open, setOpen] = useState(false);
     const [groups, setGroups] = useState<KeyStoneGroup[]>([]);
     useEffect(() => {
@@ -107,7 +110,7 @@ function CreatePolicyDialog({ policy, onCreate }: { policy: Policy, onCreate: (p
                         <Button variant="outline"><XIcon />Cancel</Button>
                     </DialogClose>
                     <Button variant="default" onClick={() => {
-                        fetch("/api/v1/policies/" + policyId + "/assignments", {
+                        fetch("/api/v1/policies/" + policy.id + "/assignments", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
