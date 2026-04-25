@@ -137,6 +137,10 @@ function PolicyBlockEditor({ block, refresh }: { block: PolicyBlock, refresh: ()
 }
 
 function FileCreateDialog({ content, setContent }: { content: any, setContent: (content: any) => void }) {
+    const [source, setSource] = useState("")
+    const [path, setPath] = useState("")
+    const [name, setName] = useState("")
+    const [conflict, setConflict] = useState<"overwrite" | "ignore">("overwrite")
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -147,16 +151,92 @@ function FileCreateDialog({ content, setContent }: { content: any, setContent: (
                     <DialogTitle>Add File</DialogTitle>
                     <DialogDescription>Add a file to the policy</DialogDescription>
                 </DialogHeader>
+                <Separator />
+                <Field>
+                    <FieldLabel>Name</FieldLabel>
+                    <FieldDescription>The name of the file.</FieldDescription>
+                    <FieldContent>
+                        <Input value={name} onChange={(e) => setName(e.target.value)} />
+                    </FieldContent>
+                </Field>
+                <Field>
+                    <FieldLabel>Source</FieldLabel>
+                    <FieldDescription>The source of the file.</FieldDescription>
+                    <FieldContent>
+                        <Input value={source} type="url" onChange={(e) => setSource(e.target.value)} />
+                    </FieldContent>
+                </Field>
+                <Field>
+                    <FieldLabel>Path</FieldLabel>
+                    <FieldDescription>The path of the file.</FieldDescription>
+                    <FieldContent>
+                        <Input value={path} type="url" onChange={(e) => setPath(e.target.value)} />
+                    </FieldContent>
+                </Field>
+                <Field>
+                    <FieldLabel>Conflict</FieldLabel>
+                    <FieldDescription>Whether the file conflicts with other files.</FieldDescription>
+                    <FieldContent>
+                        <Select value={conflict} onValueChange={(value) => setConflict(value as "overwrite" | "ignore")}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select a mode" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="overwrite">Overwrite</SelectItem>
+                                <SelectItem value="ignore">Ignore</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </FieldContent>
+                </Field>
+                <Separator />
                 <DialogFooter>
                     <DialogClose asChild>
                         <Button variant="outline"><XIcon />Cancel</Button>
                     </DialogClose>
                     <DialogClose asChild>
-                        <Button variant="outline"><PlusIcon />Add File</Button>
+                        <Button variant="outline" onClick={() => {
+                            setContent({
+                                ...content,
+                                files: [
+                                    ...content.files,
+                                    {
+                                        id: name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                                        name: name,
+                                        path: path,
+                                        source: source,
+                                        conflict: conflict
+                                    }
+                                ]
+                            })
+                        }}><PlusIcon />Add File</Button>
                     </DialogClose>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+    )
+}
+
+function FileItem({ file, index, setContent, content }: { file: { id: string, name: string, path: string, source: string, conflict: "overwrite" | "ignore" }, index: number, setContent: (content: any) => void, content: any }) {
+    return (
+        <Item key={file.id} className={(index !== 0 ? "border-t-1 border-t-[#e4e4e7]" : "") + " hover:bg-[#fafafa] rounded-t-none"}>
+            <ItemMedia>
+                <div className={`icon-file`} style={{ color: "#666666" }}></div>
+            </ItemMedia>
+            <ItemContent>
+                <ItemTitle className="text-[#666666]">{file.name}</ItemTitle>
+                <ItemDescription className="text-[#999999]">{file.path}</ItemDescription>
+            </ItemContent>
+            <ItemActions>
+                <Button variant="ghost" className="text-[#666666]" size="sm" onClick={() => {
+                    const newContent = { ...content }
+                    newContent.files = newContent.files.filter((f: any, i: number) => i !== index)
+                    setContent(newContent)
+                }}>
+                    <XIcon />
+                    Remove
+                </Button>
+            </ItemActions>
+        </Item>
     )
 }
 
