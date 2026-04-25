@@ -9,7 +9,7 @@ export default function Home() {
       <div className="text-3xl font-bold mb-2">Quntem Grid</div>
       <div className="text-xl">Easily manage your ThetaOS devices</div>
       <div className="flex flex-row items-center justify-center gap-4 mt-4">
-        <Button variant="outline"><SparklesIcon />Get Started</Button>
+        <Link href="/setup"><Button variant="outline"><SparklesIcon />Get Started</Button></Link>
         <Link href="/app"><Button variant="outline"><LogInIcon />Login</Button></Link>
       </div>
     </div>
