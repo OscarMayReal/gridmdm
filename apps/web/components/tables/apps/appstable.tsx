@@ -6,7 +6,7 @@ import { GenericTable } from "@/components/generictable";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { ListXIcon, PlusCircleIcon, PlusIcon, XIcon } from "lucide-react";
+import { Grid2X2Icon, ListXIcon, PlusCircleIcon, PlusIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Field, FieldContent, FieldDescription, FieldLabel } from "@/components/ui/field";
@@ -68,10 +68,10 @@ export function AppsTable() {
             <div className="bg-white rounded-md border-1 border-[#e4e4e7] overflow-hidden">
                 <GenericTable fallback={<Empty className="flex flex-col gap-2">
                     <EmptyMedia variant="icon">
-                        <ListXIcon />
+                        <Grid2X2Icon />
                     </EmptyMedia>
-                    <EmptyTitle>No profiles found</EmptyTitle>
-                    <EmptyDescription>Profiles are used to configure devices. Create a new profile to get started.</EmptyDescription>
+                    <EmptyTitle>No Apps found</EmptyTitle>
+                    <EmptyDescription>Manage what apps are allowed on devices. Acquire an app from the store to get started.</EmptyDescription>
                 </Empty>} table={table} onRowClick={(row) => router.push(`/app/profiles/profile/${row.original.id}`)} />
             </div>
         </>

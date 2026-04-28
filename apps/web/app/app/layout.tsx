@@ -1,6 +1,6 @@
 "use client"
 import { SidebarProvider, Sidebar, SidebarRail, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarTrigger } from "@/components/ui/sidebar";
-import { ArrowLeftIcon, GroupIcon, HomeIcon, ListIcon, MonitorSmartphoneIcon, SettingsIcon, ShieldIcon, ShoppingBasketIcon, SidebarIcon } from "lucide-react";
+import { ArrowLeftIcon, GroupIcon, HomeIcon, LayoutGridIcon, ListIcon, MonitorSmartphoneIcon, SettingsIcon, ShieldIcon, ShoppingBasketIcon, SidebarIcon } from "lucide-react";
 import { SidebarItem } from "@/components/sidebar";
 import { PageContextProvider } from "@/components/pageheader";
 import { AuthProvider, useAuthContext } from "@/components/auth";
@@ -25,7 +25,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             <SidebarItem Icon={MonitorSmartphoneIcon} label="Devices" href="/app/devices" />
                             <SidebarItem Icon={GroupIcon} label="Groups" href="/app/groups" />
                             <SidebarItem Icon={ListIcon} label="Profiles" href="/app/profiles" />
-                            <SidebarItem Icon={ShoppingBasketIcon} label="Apps" href="/app/apps" />
+                            <SidebarItem Icon={LayoutGridIcon} label="Apps" href="/app/apps" />
                             <SidebarItem Icon={ShieldIcon} label="Policies" href="/app/policies" />
                         </SidebarGroupContent>
                     </SidebarGroup>

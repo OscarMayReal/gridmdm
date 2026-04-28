@@ -5,6 +5,7 @@ import { useEffect, use, useState, useContext } from "react";
 import { Device } from "@repo/database";
 import { ProfileContext } from "../layout";
 import { GroupsAssignmentsTable } from "@/components/tables/profiles/groupstable";
+import { GroupsConditionsTable } from "@/components/tables/profiles/conditionstable";
 
 export default function AllDevicesPage({ params }: { params: Promise<{ profileid: string }> }) {
     const { setAreaTitle, setIcon, setTitle, setDescription } = usePageContext();
@@ -20,6 +21,6 @@ export default function AllDevicesPage({ params }: { params: Promise<{ profileid
         return null;
     }
     return <div className="p-4">
-        <GroupsAssignmentsTable profile={profile} refresh={refresh} />
+        <GroupsConditionsTable profile={profile} refresh={refresh} />
     </div>
 }

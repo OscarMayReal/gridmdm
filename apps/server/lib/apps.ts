@@ -140,11 +140,13 @@ export async function listAppPolicies({ tenantId }: { tenantId: string }) {
     return profiles;
 }
 
-export async function createAppPolicy({ appId, data }: { appId: string, data: any }) {
+export async function createAppPolicy({ appId, data, createdBy, tenantId }: { appId: string, data: any, createdBy: string, tenantId: string }) {
     const profileCondition = await prisma.appPolicy.create({
         data: {
             appId: appId,
-            ...data
+            ...data,
+            createdBy: createdBy,
+            tenantId: tenantId
         },
         include: {
             apps: {
@@ -160,6 +162,16 @@ export async function createAppPolicy({ appId, data }: { appId: string, data: an
         }
     });
     return profileCondition;
+}
+
+export async function getAppPolicy({ tenantId, policyId }: { tenantId: string, policyId: string }) {
+    const app = await prisma.appPolicy.findUnique({
+        where: {
+            id: policyId,
+            tenantId: tenantId
+        }
+    });
+    return app;
 }
 
 export async function updateAppPolicy({ tenantId, policyId, data }: { tenantId: string, policyId: string, data: any }) {

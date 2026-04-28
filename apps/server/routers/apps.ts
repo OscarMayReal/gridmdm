@@ -1,7 +1,5 @@
 import { Router } from "express";
-import { getManifest } from "../lib/client";
-import { getdevice } from "../lib/devices";
-import { createApp, listTenantApps } from "../lib/apps";
+import { createApp, createAppPolicy, deleteAppPolicy, getAppPolicy, listAppPolicies, listTenantApps, updateAppPolicy } from "../lib/apps";
 import { VerifySession } from "../keystone";
 import { upsertKeystoneUser } from "../lib/keystone";
 
@@ -29,6 +27,31 @@ router.post("/acquireapp", async (req, res) => {
     const app = await createApp({ tenantId: req.sessionData?.tenant.id as string, appId, name: req.body.name, description: req.body.description, version: req.body.version, userId: req.sessionData?.user.id as string })
     res.json(app);
 });
+
+router.get('/policy/:policyId', async (req, res) => {
+    const profile = await getAppPolicy({ tenantId: req.sessionData?.tenant.id as string, policyId: req.params.policyId })
+    res.json(profile)
+})
+
+router.post('/policy', async (req, res) => {
+    const profile = await createAppPolicy({ appId: req.body.appId, data: req.body, createdBy: req.sessionData?.user.id as string, tenantId: req.sessionData?.tenant.id as string })
+    res.json(profile)
+})
+
+router.put('/policy/:policyId', async (req, res) => {
+    const profile = await updateAppPolicy({ tenantId: req.sessionData?.tenant.id as string, policyId: req.params.policyId, data: req.body })
+    res.json(profile)
+})
+
+router.delete('/:policyId', async (req, res) => {
+    const profile = await deleteAppPolicy({ tenantId: req.sessionData?.tenant.id as string, policyId: req.params.policyId })
+    res.json(profile)
+})
+
+router.get('/policies', async (req, res) => {
+    const policies = await listAppPolicies({ tenantId: req.sessionData?.tenant.id as string })
+    res.json(policies)
+})
 
 router.get("/", async (req, res) => {
     const apps = await listTenantApps({ tenantId: req.sessionData?.tenant.id as string })
