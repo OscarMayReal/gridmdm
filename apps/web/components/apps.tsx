@@ -20,6 +20,9 @@ export function AppItem({ app, onClick }: { app: any, onClick: () => void }) {
 
 export function AppDialog({ app }: { app: any }) {
     const [open, setOpen] = useState(false);
+    if (open) {
+        console.log(app);
+    }
     return <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
             <AppItem onClick={() => setOpen(true)} app={app} />
@@ -35,7 +38,7 @@ export function AppDialog({ app }: { app: any }) {
                 </div>
             </DialogHeader>
             <Separator />
-            {open && <AppDialogContent appId={app.id.replaceAll("_", ".")} />}
+            {open && <AppDialogContent appId={app.app_id} />}
         </DialogContent>
     </Dialog>
 }
@@ -46,6 +49,7 @@ function AppDialogContent({ appId }: { appId: string }) {
     return <div className="max-h-full overflow-y-auto">
         <div className="flex flex-row gap-3 max-w-full overflow-x-auto p-6 pb-0 pt-6 h-fit">
             <Button onClick={() => {
+                console.log(app.app);
                 fetch("/api/v1/apps/acquireapp", {
                     method: "POST",
                     headers: {

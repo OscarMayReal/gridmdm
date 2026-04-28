@@ -226,3 +226,26 @@ export async function deleteAppPolicyGroupAssignment({ policyId, assignmentId }:
     });
     return profileAssignment;
 }
+
+export async function createAppPolicyEntry({ policyId, appId, rule }: { policyId: string, appId: string, rule: string }) {
+    const profileEntry = await prisma.appPolicyEntry.create({
+        data: {
+            appPolicyId: policyId,
+            appId: appId,
+            rule: rule as any
+        }
+    });
+    return profileEntry;
+}
+
+export async function deleteAppPolicyEntry({ policyId, entryId }: { policyId: string, entryId: string }) {
+    const profileEntry = await prisma.appPolicyEntry.delete({
+        where: {
+            appPolicyId_appId: {
+                appPolicyId: policyId,
+                appId: entryId
+            }
+        }
+    });
+    return profileEntry;
+}

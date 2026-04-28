@@ -431,7 +431,6 @@ model App {
   appId       String
   version     String   @default("1.0.0")
   priority    Int      @default(100)
-  rule        AppRule  @default(OPTIONAL)
   enabled     Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -449,6 +448,7 @@ model AppPolicyEntry {
   appId       String
   app         App       @relation(fields: [appId], references: [id], onDelete: Cascade)
   appPolicy   AppPolicy @relation(fields: [appPolicyId], references: [id], onDelete: Cascade)
+  rule        AppRule   @default(OPTIONAL)
 
   @@unique([appPolicyId, appId])
   @@map("app_policy_entries")

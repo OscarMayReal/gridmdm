@@ -1,6 +1,6 @@
 "use client"
 import { usePageContext } from "@/components/pageheader";
-import { GroupIcon, InfoIcon, ListIcon, ShieldIcon } from "lucide-react";
+import { GroupIcon, InfoIcon, LayoutGridIcon, ListIcon, ShieldIcon } from "lucide-react";
 import { createContext, useEffect, use, useState } from "react";
 import { AppPolicy } from "@repo/database";
 import { SidebarItem } from "@/components/sidebar";
@@ -43,7 +43,7 @@ export default function AllDevicesPage({ params, children }: { params: Promise<{
                     <SidebarGroup>
                         <SidebarGroupContent className="flex flex-col gap-[4px]">
                             <SidebarItem equals Icon={InfoIcon} label="Overview" href={`/app/policies/application/policy/${policyid}`} />
-                            <SidebarItem equals Icon={ListIcon} label="Blocks" href={`/app/policies/application/policy/${policyid}/blocks`} />
+                            <SidebarItem equals Icon={LayoutGridIcon} label="Apps" href={`/app/policies/application/policy/${policyid}/apps`} />
                             <SidebarItem equals Icon={GroupIcon} label="Assignments" href={`/app/policies/application/policy/${policyid}/assignments`} />
                         </SidebarGroupContent>
                     </SidebarGroup>

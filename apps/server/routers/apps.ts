@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createApp, createAppPolicy, createAppPolicyGroupAssignment, deleteAppPolicy, deleteAppPolicyGroupAssignment, getAppPolicy, listAppPolicies, listTenantApps, updateAppPolicy } from "../lib/apps";
+import { createApp, createAppPolicy, createAppPolicyEntry, createAppPolicyGroupAssignment, deleteAppPolicy, deleteAppPolicyEntry, deleteAppPolicyGroupAssignment, getAppPolicy, listAppPolicies, listTenantApps, updateAppPolicy } from "../lib/apps";
 import { VerifySession } from "../keystone";
 import { upsertKeystoneUser } from "../lib/keystone";
 
@@ -65,6 +65,16 @@ router.post('/policy/:policyId/assignments', async (req, res) => {
 
 router.delete('/policy/:policyId/assignments/:assignmentId', async (req, res) => {
     const profileAssignment = await deleteAppPolicyGroupAssignment({ policyId: req.params.policyId, assignmentId: req.params.assignmentId })
+    res.json(profileAssignment)
+})
+
+router.post('/policy/:policyId/appentry', async (req, res) => {
+    const profileAssignment = await createAppPolicyEntry({ policyId: req.params.policyId, appId: req.body.appId, rule: req.body.rule })
+    res.json(profileAssignment)
+})
+
+router.delete('/policy/:policyId/appentry/:entryId', async (req, res) => {
+    const profileAssignment = await deleteAppPolicyEntry({ policyId: req.params.policyId, entryId: req.params.entryId })
     res.json(profileAssignment)
 })
 
