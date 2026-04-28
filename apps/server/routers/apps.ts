@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createApp, createAppPolicy, deleteAppPolicy, getAppPolicy, listAppPolicies, listTenantApps, updateAppPolicy } from "../lib/apps";
+import { createApp, createAppPolicy, createAppPolicyGroupAssignment, deleteAppPolicy, deleteAppPolicyGroupAssignment, getAppPolicy, listAppPolicies, listTenantApps, updateAppPolicy } from "../lib/apps";
 import { VerifySession } from "../keystone";
 import { upsertKeystoneUser } from "../lib/keystone";
 
@@ -57,5 +57,15 @@ router.get("/", async (req, res) => {
     const apps = await listTenantApps({ tenantId: req.sessionData?.tenant.id as string })
     res.json(apps);
 });
+
+router.post('/policy/:policyId/assignments', async (req, res) => {
+    const profileAssignment = await createAppPolicyGroupAssignment({ policyId: req.params.policyId, groupId: req.body.groupId })
+    res.json(profileAssignment)
+})
+
+router.delete('/policy/:policyId/assignments/:assignmentId', async (req, res) => {
+    const profileAssignment = await deleteAppPolicyGroupAssignment({ policyId: req.params.policyId, assignmentId: req.params.assignmentId })
+    res.json(profileAssignment)
+})
 
 export default router;

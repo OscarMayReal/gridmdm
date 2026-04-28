@@ -1,6 +1,6 @@
 "use client"
 import { usePageContext } from "@/components/pageheader";
-import { InfoIcon, LaptopIcon, MonitorSmartphoneIcon } from "lucide-react";
+import { GroupIcon, InfoIcon, LaptopIcon, MonitorSmartphoneIcon } from "lucide-react";
 import { useEffect, use, useState } from "react";
 import { Device } from "@repo/database";
 import { PolicyContext } from "../layout";
@@ -14,7 +14,7 @@ export default function AllDevicesPage() {
     useEffect(() => {
         if (loaded) {
             setAreaTitle("Assignments");
-            setIcon(InfoIcon);
+            setIcon(GroupIcon);
         }
     }, [loaded]);
     if (!policy) return null;

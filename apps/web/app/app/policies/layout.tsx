@@ -11,7 +11,7 @@ export default function DevicesLayout({ children }: { children: React.ReactNode 
         <div className="max-h-[calc(100vh-50px)] h-[100%] flex flex-col">
             <PageHeader />
             <div className="flex flex-row flex-1 h-[100%]">
-                {(!pathname.startsWith("/app/policies/policy/") && !pathname.startsWith("/app/policies/application/policy/")) && <Sidebar className="static" style={{ backgroundColor: "#f5f5f5", maxHeight: "100%", height: "100%" }}>
+                {!pathname.startsWith("/app/policies/policy/") && !pathname.startsWith("/app/policies/application/policy/") && <Sidebar className="static" style={{ backgroundColor: "#f5f5f5", maxHeight: "100%", height: "100%" }}>
                     <SidebarContent className="bg-[#f5f5f5] p-2 flex flex-col gap-[0px]" style={{ maxHeight: "100%", height: "100%" }}>
                         <SidebarGroup>
                             <SidebarGroupContent className="flex flex-col gap-[4px]">

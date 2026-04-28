@@ -11,7 +11,7 @@ export default function AllDevicesPage() {
         setAreaTitle("App Policies");
         setIcon(LayoutGridIcon);
         setTitle("Policies");
-        setDescription("Manage all policies");
+        setDescription("Manage all app policies");
     }, []);
     return <div className="p-4">
         <AppPoliciesTable />

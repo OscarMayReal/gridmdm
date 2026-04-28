@@ -169,6 +169,18 @@ export async function getAppPolicy({ tenantId, policyId }: { tenantId: string, p
         where: {
             id: policyId,
             tenantId: tenantId
+        },
+        include: {
+            apps: {
+                include: {
+                    app: true
+                }
+            },
+            assignments: {
+                include: {
+                    group: true
+                }
+            }
         }
     });
     return app;
