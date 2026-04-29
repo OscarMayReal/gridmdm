@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "../ui/empty";
 import { LaptopMinimalIcon, ListXIcon } from "lucide-react";
 
-export function DevicesTable() {
+export function DevicesTable({mode = "all"}:{mode?: "all" | "user" | "admin"}) {
     const [devices, setDevices] = useState<{ data: Device[], loaded: boolean }>({ data: [], loaded: false });
     const [columnFilters, setColumnFilters] = useState([]);
     useEffect(() => {
@@ -19,7 +19,7 @@ export function DevicesTable() {
                 },
                 credentials: "include"
             }).then(res => res.json()).then(data => {
-                setDevices({ data, loaded: true });
+                setDevices({ data: mode === "all" ? data : data.filter((device: Device) => device.isSelfEnrolled === (mode === "user")), loaded: true });
             });
         }
     }, [devices.loaded]);

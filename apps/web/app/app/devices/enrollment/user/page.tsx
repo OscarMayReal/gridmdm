@@ -1,5 +1,6 @@
 "use client"
 import { usePageContext } from "@/components/pageheader";
+import { DevicesTable } from "@/components/tables/devicestable";
 import { UserIcon } from "lucide-react";
 import { useEffect } from "react";
 
@@ -11,7 +12,7 @@ export default function UserEnrollmentPage() {
         setTitle("Devices");
         setDescription("Manage all enrolled devices");
     }, []);
-    return <div>
-        <p>User Enrollment</p>
+    return <div className="p-4">
+        <DevicesTable mode="user" />
     </div>
 }
