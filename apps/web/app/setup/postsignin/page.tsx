@@ -111,7 +111,7 @@ function Step2({ setStep, gridTenant, setGridTenant }: { setStep: (step: number)
                         <ItemTitle className="text-[#666666]">2. Bind your MDM</ItemTitle>
                         <ItemDescription className="w-full mb-1">Click "Add MDM Server" and enter the details for your MDM, then click "add"</ItemDescription>
                         <div className="text-[#666666]">name: <code className="text-[#666666] p-1 bg-[#f5f5f5] ml-1 rounded-md">[Whatever you want]</code></div>
-                        <div className="text-[#666666]">URL: <code className="text-[#666666] p-1 bg-[#f5f5f5] ml-1 rounded-md">https://grid.quntem.co.uk</code></div>
+                        <div className="text-[#666666]">URL: <code className="text-[#666666] p-1 bg-[#f5f5f5] ml-1 rounded-md">https://grid.qplus.cloud</code></div>
                         <div className="text-[#666666]">Enrollment Token: <code className="text-[#666666] p-1 bg-[#f5f5f5] ml-1 rounded-md">{gridTenant?.enrollmentToken}</code></div>
                         <div className="text-[#666666]">Is Default: <code className="text-[#666666] p-1 bg-[#f5f5f5] ml-1 rounded-md">Required for self-enrollment</code></div>
                     </ItemContent>

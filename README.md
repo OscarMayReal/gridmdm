@@ -1,159 +1,147 @@
-# Turborepo starter
+# GridMDM
 
-This Turborepo starter is maintained by the Turborepo core team.
+Quntem Grid is a device management platform for ThetaOS devices. It combines a Next.js admin app, a Bun/Express API, and a shared Prisma database package for tenant setup, device enrollment, policy management, and app distribution.
 
-## Using this example
+## What It Does
 
-Run the following command:
+- Authenticates admins through KeyStone
+- Mirrors KeyStone tenant, user, and group data into the MDM database
+- Accepts KeyStone device lifecycle webhooks for enroll, unenroll, and group changes
+- Manages devices, groups, enrolment profiles, device policies, and app policies
+- Proxies parts of the Flathub API for app discovery
 
-```sh
-npx create-turbo@latest
-```
+## Monorepo Layout
 
-## What's inside?
+- `apps/web`: Next.js admin UI
+- `apps/server`: Bun + Express API
+- `packages/database`: Prisma schema, generated client, and shared database types
+- `packages/eslint-config`: shared ESLint config
+- `packages/typescript-config`: shared TypeScript config
 
-This Turborepo includes the following packages/apps:
+## Stack
 
-### Apps and Packages
+- Turborepo
+- Next.js 16
+- React 19
+- Express 5
+- Prisma
+- PostgreSQL
+- KeyStone integration
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## Requirements
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+- Bun `1.3.11`
+- Node.js `18+`
+- PostgreSQL
 
-### Utilities
+## Getting Started
 
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
-```
-
-Without global `turbo`, use your package manager:
+1. Install dependencies:
 
 ```sh
-cd my-turborepo
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+bun install
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+2. Create a root `.env` file.
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+3. Generate the Prisma client and run migrations:
 
 ```sh
-turbo build --filter=docs
+cd packages/database
+bun run db:generate
+bun run db:migrate
 ```
 
-Without global `turbo`:
+4. Start the whole workspace:
 
 ```sh
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+cd /path/to/gridmdm
+bun run dev
 ```
 
-### Develop
+This starts:
 
-To develop all apps and packages, run the following command:
+- the Next.js app on `http://localhost:3000`
+- the Express API on `http://localhost:6090`
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+In development, the web app rewrites `/api/*` requests to the local API server on port `6090`.
+
+## Environment Variables
+
+Create a `.env` file in the repository root with values for:
+
+```env
+DATABASE_URL=
+
+APP_ID=
+APP_SECRET=
+KEYSTONE_URL=
+
+NEXT_PUBLIC_KEYSTONE_APPID=
+NEXT_PUBLIC_KEYSTONE_URL=
+NEXT_PUBLIC_KEYSTONE_ACQUIRE_URL=
+NEXT_PUBLIC_API_URL=
+```
+
+Notes:
+
+- `DATABASE_URL` is used by Prisma in `packages/database`
+- `APP_ID`, `APP_SECRET`, and `KEYSTONE_URL` are used by the API to verify KeyStone sessions
+- `NEXT_PUBLIC_*` values are used by the frontend setup and auth flow
+- For local development, `NEXT_PUBLIC_API_URL` will usually be `http://localhost:3000`
+
+## Useful Commands
+Database commands:
 
 ```sh
-cd my-turborepo
-turbo dev
+cd packages/database
+bun run db:generate
+bun run db:migrate
+bun run db:deploy
+bun run db:studio
 ```
 
-Without global `turbo`, use your package manager:
+## KeyStone Setup Flow
 
-```sh
-cd my-turborepo
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+The app is designed around a KeyStone-backed setup flow:
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+1. Acquire the Grid app in your KeyStone tenant
+2. Assign yourself to the app in KeyStone
+3. Open `/setup` in the web app
+4. Sign in through KeyStone
+5. Let Grid create the tenant record in its database
+6. Add Grid as an MDM server inside KeyStone using the generated enrollment token
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+After that, KeyStone can send device webhook events to Grid and devices can be managed through the admin UI.
 
-```sh
-turbo dev --filter=web
-```
+## API Overview
 
-Without global `turbo`:
+Primary routes exposed by the API:
 
-```sh
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+- `/api/v1/keystone/webhook/device`: KeyStone device webhook endpoint
+- `/api/internal/v1/tenant/*`: tenant setup endpoints used by the onboarding flow
+- `/api/v1/devices`: device management
+- `/api/v1/profiles`: enrolment profiles
+- `/api/v1/policies`: device policies
+- `/api/v1/apps`: app catalog and app policies
+- `/api/v1/groups`: group-based management
 
-### Remote Caching
+## Data Model
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+The Prisma schema models:
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+- tenants
+- mirrored KeyStone users and groups
+- devices and enrollment tokens
+- enrolment profiles and conditions
+- device policies and app policies
+- installed apps, commands, app requests, and LAPS data
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+See [`packages/database/prisma/schema.prisma`](./packages/database/prisma/schema.prisma) for the full schema.
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+## Development Notes
 
-```sh
-cd my-turborepo
-turbo login
-```
+- The server currently listens on port `6090`
+- The frontend expects KeyStone auth/session data and stores a `keystone_session` cookie during setup/sign-in
+- The web app includes local API rewrites, so both `apps/web` and `apps/server` should be running during development
 
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
