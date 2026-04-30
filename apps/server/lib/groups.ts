@@ -8,7 +8,11 @@ export async function listGroups({ tenantId }: { tenantId: string }) {
         },
         include: {
             tenant: true,
-            devices: true
+            devices: true,
+            appPolicyAssignments: true,
+            policyAssignments: true,
+            profileAssignments: true,
+            profileConditions: true,
         }
     });
     return profiles;
@@ -22,7 +26,11 @@ export async function getGroup({ tenantId, groupId }: { tenantId: string, groupI
         },
         include: {
             tenant: true,
-            devices: true
+            devices: true,
+            appPolicyAssignments: true,
+            policyAssignments: true,
+            profileAssignments: true,
+            profileConditions: true
         }
     });
     return profiles;

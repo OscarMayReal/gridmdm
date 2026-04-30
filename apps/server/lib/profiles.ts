@@ -14,7 +14,11 @@ export async function listProfiles({ tenantId }: { tenantId: string }) {
             },
             tenant: true,
             devices: true,
-            assignments: true
+            assignments: {
+                include: {
+                    group: true
+                }
+            }
         }
     });
     return profiles;
