@@ -48,8 +48,8 @@ export function DevicesGroupsTable({device}: {device: Device}) {
                         <GroupIcon />
                     </EmptyMedia>
                     <EmptyTitle>No Groups found</EmptyTitle>
-                    <EmptyDescription>Grouops define how devices are organized and managed. Add the device to a group in KeyStone to get started.</EmptyDescription>
-                </Empty>} table={table} onRowClick={(row) => router.push(`/app/devices/device/${row.original.id}`)} />
+                    <EmptyDescription>Groups define how devices are organized and managed. Add the device to a group in KeyStone to get started.</EmptyDescription>
+                </Empty>} table={table} onRowClick={(row) => router.push(`/app/groups/group/${row.original.group.id}`)} />
             </div>
         </>
     )

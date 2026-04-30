@@ -8,9 +8,15 @@ export async function listdevices({ tenantId }: { tenantId: string }) {
         include: {
             groups: {
                 include: {
-                    group: true
+                    group: {
+                        include: {
+                            policyAssignments: true,
+                            appPolicyAssignments: true
+                        }
+                    }
                 }
             },
+            enrolmentProfile: true,
             user: true,
             installedApps: true,
             enrolledBy: true,
@@ -29,9 +35,16 @@ export async function getdevice({ tenantId, deviceId }: { tenantId: string, devi
         include: {
             groups: {
                 include: {
-                    group: true
+                    group: {
+                        include: {
+                            policyAssignments: true,
+                            appPolicyAssignments: true
+                        }
+                    }
                 }
             },
+            enrolmentProfile: true,
+            commands: true,
             user: true,
             installedApps: true,
             enrolledBy: true,

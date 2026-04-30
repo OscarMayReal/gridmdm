@@ -278,7 +278,7 @@ export async function handleEnroll(device: KeyStoneDevice): Promise<void> {
       enrolledAt: new Date(device.enrolledAt),
       enrolledById: device.enrolledBy?.id ?? null,
       assignedUserId: device.user?.id ?? null,
-      enrolmentProfileId: profileId,
+      enrolmentProfileId: device.isSelfEnrolled ? profileId : null,
       status: 'MANAGED',
       mdmTags: [],
     },
@@ -295,6 +295,33 @@ export async function handleEnroll(device: KeyStoneDevice): Promise<void> {
     await prisma.deviceToken.create({
       data: { deviceId: device.id, token },
     })
+  }
+
+  if (device.isSelfEnrolled && device.enrolmentProfileId) {
+    const profile = await prisma.enrolmentProfile.findUnique({
+      where: { id: device.enrolmentProfileId },
+      include: {
+        assignments: {
+          include: {
+            group: true,
+          },
+        },
+      },
+    })
+    for (const assignment of profile?.assignments || []) {
+      await fetch(`${process.env.KEYSTONE_URL}/admin/mdmactions/group/${assignment.group.id}/device`, {
+        method: 'POST',
+        headers: {
+          'mdmserverid': device.mdmServerId!,
+          "authorization": `Bearer ${tenantExists.enrollmentToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          deviceId: device.id,
+        }),
+      })
+    }
+    console.log(`[enrol] device ${device.id} (${device.name}) enrolled into org ${tenantId} with profile`, profile)
   }
 
   console.log(`[enrol] device ${device.id} (${device.name}) enrolled into org ${tenantId}`)
@@ -345,14 +372,14 @@ export async function handleGroupsModify(device: KeyStoneDevice): Promise<void> 
     data: { assignedUserId: device.user?.id ?? null, displayName: device.displayName },
   })
 
-  await prisma.command.create({
-    data: {
-      deviceId: device.id,
-      action: 'REEVALUATE_POLICY',
-      issuedBy: 'system:keystone-webhook',
-      status: 'QUEUED',
-    },
-  })
+  // await prisma.command.create({
+  //   data: {
+  //     deviceId: device.id,
+  //     action: 'REEVALUATE_POLICY',
+  //     issuedBy: 'system:keystone-webhook',
+  //     status: 'QUEUED',
+  //   },
+  // })
 
   console.log(`[groupsmodify] updated groups for device ${device.id} (${device.name})`)
 }
