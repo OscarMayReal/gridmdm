@@ -44,7 +44,7 @@ export function GroupsAssignmentsTable({ profile, refresh }: { profile: Enrolmen
                     </EmptyMedia>
                     <EmptyTitle>No assignments found</EmptyTitle>
                     <EmptyDescription>Assignments are used to assign groups to devices in profiles. Create a new assignment to get started.</EmptyDescription>
-                </Empty>} table={table} onRowClick={(row) => router.push(`/app/profiles/profile/${row.original.id}`)} />
+                </Empty>} table={table} onRowClick={(row) => router.push(`/app/groups/group/${row.original.group.id}`)} />
             </div>
         </>
     )

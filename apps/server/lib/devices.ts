@@ -37,8 +37,16 @@ export async function getdevice({ tenantId, deviceId }: { tenantId: string, devi
                 include: {
                     group: {
                         include: {
-                            policyAssignments: true,
-                            appPolicyAssignments: true
+                            policyAssignments: {
+                                include: {
+                                    policy: true
+                                }
+                            },
+                            appPolicyAssignments: {
+                                include: {
+                                    appPolicy: true
+                                }
+                            }
                         }
                     }
                 }

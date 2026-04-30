@@ -44,7 +44,7 @@ export function AppAssignmentsTable({ policy, setPolicy, refresh }: { policy: Ap
                     </EmptyMedia>
                     <EmptyTitle>No assignments found</EmptyTitle>
                     <EmptyDescription>Assignments are used to assign policies to groups. Create a new assignment to get started.</EmptyDescription>
-                </Empty>} table={table} onRowClick={(row) => router.push(`/app/policies/policy/${row.original.id}`)} />
+                </Empty>} table={table} onRowClick={(row) => router.push(`/app/groups/group/${row.original.group.id}`)} />
             </div>
         </>
     )

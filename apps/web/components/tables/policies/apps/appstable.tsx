@@ -124,7 +124,7 @@ function CreateAppEntryDialog({ policy, onCreate }: { policy: Policy, onCreate: 
                             </SelectTrigger>
                             <SelectContent>
                                 {apps.map((app) => (
-                                    <SelectItem key={app.id} value={app.id}>
+                                    <SelectItem key={app.id} value={app.id} disabled={policy.apps.some((appEntry) => appEntry.appId === app.id)}>
                                         {app.name}
                                     </SelectItem>
                                 ))}

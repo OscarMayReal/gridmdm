@@ -18,13 +18,13 @@ export default function DevicesLayout({ children }: { children: React.ReactNode 
                                 <SidebarItem equals Icon={ListIcon} label="All Profiles" href="/app/profiles" />
                             </SidebarGroupContent>
                         </SidebarGroup>
-                        <SidebarGroup>
+                        {/* <SidebarGroup>
                             <SidebarGroupLabel>By Enrollment Type</SidebarGroupLabel>
                             <SidebarGroupContent className="flex flex-col gap-[4px]">
                                 <SidebarItem Icon={UserIcon} label="User Enrollment" href="/app/devices/enrollment/user" />
                                 <SidebarItem Icon={CrownIcon} label="Admin Enrollment" href="/app/devices/enrollment/admin" />
                             </SidebarGroupContent>
-                        </SidebarGroup>
+                        </SidebarGroup> */}
                     </SidebarContent>
                 </Sidebar>}
                 <div className="flex-1">

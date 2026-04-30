@@ -17,14 +17,14 @@ export default function DevicesLayout({ children }: { children: React.ReactNode 
                             <SidebarGroupLabel>Your Apps</SidebarGroupLabel>
                             <SidebarGroupContent className="flex flex-col gap-[4px]">
                                 <SidebarItem Icon={LayoutGridIcon} label="Your Apps" equals href="/app/apps" />
-                                <SidebarItem Icon={MessageSquareIcon} label="App Requests" href="/app/apps/requests" />
+                                {/* <SidebarItem Icon={MessageSquareIcon} label="App Requests" href="/app/apps/requests" /> */}
                             </SidebarGroupContent>
                         </SidebarGroup>
                         <SidebarGroup>
                             <SidebarGroupLabel>Store</SidebarGroupLabel>
                             <SidebarGroupContent className="flex flex-col gap-[4px]">
                                 <SidebarItem Icon={CrownIcon} label="Featured Apps" href="/app/apps/store" />
-                                <SidebarItem Icon={SearchIcon} label="Search Apps" href="/app/apps/store/search" />
+                                {/* <SidebarItem Icon={SearchIcon} label="Search Apps" href="/app/apps/store/search" /> */}
                             </SidebarGroupContent>
                         </SidebarGroup>
                     </SidebarContent>

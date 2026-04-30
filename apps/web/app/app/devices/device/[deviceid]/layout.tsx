@@ -49,17 +49,17 @@ export default function AllDevicesPage({ params, children }: { params: Promise<{
                         <SidebarGroupLabel>Management</SidebarGroupLabel>
                         <SidebarGroupContent className="flex flex-col gap-[4px]">
                             <SidebarItem Icon={ShieldIcon} label="Policies" href={`/app/devices/device/${deviceid}/management/policies`} />
-                            <SidebarItem Icon={LayoutGridIcon} label="Installed Apps" href={`/app/devices/device/${deviceid}/management/apps`} />
+                            <SidebarItem Icon={LayoutGridIcon} label="App Policies" href={`/app/devices/device/${deviceid}/management/apps`} />
                         </SidebarGroupContent>
                     </SidebarGroup>
-                    <SidebarGroup>
+                    {/* <SidebarGroup>
                         <SidebarGroupLabel>Information</SidebarGroupLabel>
                         <SidebarGroupContent className="flex flex-col gap-[4px]">
                             <SidebarItem Icon={ClockIcon} label="Command History" href={`/app/devices/device/${deviceid}/info/commands`} />
                             <SidebarItem Icon={MessageSquareIcon} label="App Requests" href={`/app/devices/device/${deviceid}/info/requests`} />
                             <SidebarItem Icon={KeyIcon} label="LAPS Password" href={`/app/devices/device/${deviceid}/info/laps`} />
                         </SidebarGroupContent>
-                    </SidebarGroup>
+                    </SidebarGroup> */}
                 </SidebarContent>
             </Sidebar>
             <div className="flex-1">
