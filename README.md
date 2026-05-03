@@ -2,6 +2,8 @@
 
 Quntem Grid is a device management platform for ThetaOS devices. It combines a Next.js admin app, a Bun/Express API, and a shared Prisma database package for tenant setup, device enrollment, policy management, and app distribution.
 
+link: https://drop.ui.com/95a5f99c-e206-4ca1-a0b6-696d61d110df/resources/2.0.0-beta (not github releases because the ISO is too large)
+
 ## What It Does
 
 - Authenticates admins through KeyStone
@@ -35,6 +37,8 @@ Quntem Grid is a device management platform for ThetaOS devices. It combines a N
 - PostgreSQL
 
 ## Getting Started
+
+note: this is for self hosting. for a demo, see `read-this-to-learn-how-to-use-it.md`
 
 1. Install dependencies:
 
