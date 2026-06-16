@@ -13,16 +13,28 @@ export default function AllDevicesPage() {
     const { setAreaTitle, setIcon, setTitle, setDescription } = usePageContext();
     const appsOfTheWeek = useAppsOfTheWeek();
     const categories = useCatagories();
+    const [tenantApps, setTenantApps] = useState<{ loaded: boolean; data: any[] }>({ loaded: false, data: [] });
     useEffect(() => {
         console.log(appsOfTheWeek);
     }, [appsOfTheWeek]);
+    useEffect(() => {
+        fetch("/api/v1/apps", {
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include"
+        }).then((res) => res.json()).then((data) => {
+            setTenantApps({ loaded: true, data });
+        });
+    }, []);
     useEffect(() => {
         setAreaTitle("Apps");
         setIcon(CrownIcon);
         setTitle("Featured Apps");
         setDescription("Browse and install apps from the store");
     }, []);
-    const { width } = useWindowSize();
+    const windowSize = useWindowSize();
+    const width = windowSize.width ?? 0;
     return <div className="flex flex-col max-w-full max-h-[calc(100vh-153px)] overflow-y-auto">
         <div className="max-w-[1280px] mx-auto px-8 w-full">
             <div className="flex flex-row items-center gap-2 py-8">
@@ -50,16 +62,16 @@ export default function AllDevicesPage() {
                 <CarouselPrevious className="ml-17" />
                 <CarouselNext className="mr-17" />
             </Carousel>
-            <TrendingSection />
-            {categories.loaded && categories.data.map((category) => (
-                <CategorySection key={category} category={category} />
+            <TrendingSection acquiredApps={tenantApps.data} acquisitionReady={tenantApps.loaded} onAcquired={(app) => setTenantApps((current) => ({ ...current, data: current.data.some((tenantApp) => tenantApp.appId === app.appId) ? current.data : [...current.data, app] }))} />
+            {categories.loaded && categories.data && categories.data.map((category) => (
+                <CategorySection key={category} category={category} acquiredApps={tenantApps.data} acquisitionReady={tenantApps.loaded} onAcquired={(app) => setTenantApps((current) => ({ ...current, data: current.data.some((tenantApp) => tenantApp.appId === app.appId) ? current.data : [...current.data, app] }))} />
             ))}
             <div className="h-10" />
         </div>
     </div>
 }
 
-function TrendingSection() {
+function TrendingSection({ acquiredApps, acquisitionReady, onAcquired }: { acquiredApps: any[]; acquisitionReady: boolean; onAcquired: (app: any) => void }) {
     const [isShowingAll, setIsShowingAll] = useState(false);
     const trendingApps = useTrendingApps();
     return <>
@@ -68,14 +80,14 @@ function TrendingSection() {
             <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setIsShowingAll(!isShowingAll)}>{isShowingAll ? "Show Less" : "View All"}<ArrowDownIcon /></Button>
         </div>
         <div className="grid grid-cols-4 gap-4">
-            {trendingApps.loaded && trendingApps.data.hits.slice(0, isShowingAll ? trendingApps.data.hits.length : 8).map((app) => (
-                <AppDialog key={app.id} app={app} />
+            {trendingApps.loaded && trendingApps.data && trendingApps.data.hits.slice(0, isShowingAll ? trendingApps.data.hits.length : 8).map((app: any) => (
+                <AppDialog key={app.id} app={app} acquired={acquiredApps.some((tenantApp) => tenantApp.appId === (app.app_id ?? app.id))} acquisitionReady={acquisitionReady} onAcquired={onAcquired} />
             ))}
         </div>
     </>
 }
 
-function CategorySection({ category }: { category: string }) {
+function CategorySection({ category, acquiredApps, acquisitionReady, onAcquired }: { category: string, acquiredApps: any[]; acquisitionReady: boolean; onAcquired: (app: any) => void }) {
     const [isShowingAll, setIsShowingAll] = useState(false);
     const categoryApps = useCategory({ category });
     return <>
@@ -84,8 +96,8 @@ function CategorySection({ category }: { category: string }) {
             <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setIsShowingAll(!isShowingAll)}>{isShowingAll ? "Show Less" : "View All"}<ArrowDownIcon /></Button>
         </div>
         <div className="grid grid-cols-4 gap-4">
-            {categoryApps.loaded && categoryApps.data.hits.slice(0, isShowingAll ? categoryApps.data.hits.length : 8).map((app) => (
-                <AppDialog key={app.id} app={app} />
+            {categoryApps.loaded && categoryApps.data && categoryApps.data.hits.slice(0, isShowingAll ? categoryApps.data.hits.length : 8).map((app: any) => (
+                <AppDialog key={app.id} app={app} acquired={acquiredApps.some((tenantApp) => tenantApp.appId === (app.app_id ?? app.id))} acquisitionReady={acquisitionReady} onAcquired={onAcquired} />
             ))}
         </div>
     </>

@@ -62,8 +62,14 @@ export async function updateApp({ tenantId, appId, data }: { tenantId: string, a
 }
 
 export async function createApp({ tenantId, appId, name, description, version, userId }: { tenantId: string, appId: string, name: string, description: string, version: string, userId: string }) {
-    const profiles = await prisma.app.create({
-        data: {
+    const profiles = await prisma.app.upsert({
+        where: {
+            tenantId_appId: {
+                tenantId: tenantId,
+                appId: appId
+            }
+        },
+        create: {
             appId: appId,
             name: name,
             description: description,
@@ -71,6 +77,7 @@ export async function createApp({ tenantId, appId, name, description, version, u
             version: version,
             tenantId: tenantId
         },
+        update: {},
         include: {
             appPolicies: {
                 include: {

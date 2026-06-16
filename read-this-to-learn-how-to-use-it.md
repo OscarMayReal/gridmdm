@@ -2,9 +2,7 @@
 
 Go to Grid at https://grid.qplus.cloud, and click log in.
 
-Log in with the demo user:
-- email: admin@quntemtestingsubdomain.dedyn.io
-- password: test
+Log in with your account credentials.
 
 Try exploring around.
 
@@ -25,7 +23,7 @@ Try exploring around.
 - Pick a configuration type
 - Click Create
 
-For device settings, use a DCONF configuration and edit the JSON content. For app availability, use an Allowed Apps configuration and add apps to it.
+For device settings, use a DCONF configuration and edit the settings as needed. For app availability, use an Allowed Apps configuration and add apps to it.
 
 ### Create a profile
 

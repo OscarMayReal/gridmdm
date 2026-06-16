@@ -521,6 +521,7 @@ model App {
   tenant      Tenant           @relation(fields: [tenantId], references: [id])
   appPolicies AppPolicyEntry[]
 
+  @@unique([tenantId, appId])
   @@map("apps")
 }
 
