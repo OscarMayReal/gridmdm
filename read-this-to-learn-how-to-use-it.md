@@ -1,100 +1,81 @@
 # Read this to learn how to use it
 
-go to grid at https://grid.qplus.cloud, and click log in
+Go to Grid at https://grid.qplus.cloud, and click log in.
 
-log in with the demo user:
+Log in with the demo user:
 - email: admin@quntemtestingsubdomain.dedyn.io
 - password: test
 
-try exploring around.
+Try exploring around.
 
-## some things to try
+## Some things to try
 
-### acquire an app:
+### Acquire an app
 
-- click apps in the main sidebar
-- click featured apps in the secondary sidebar
-- click on an app to see its details
-- click acquire to acquire the app
+- Click Apps in the main sidebar
+- Click Featured Apps in the secondary sidebar
+- Click on an app to see its details
+- Click Acquire to acquire the app
 
-### Create a policy:
+### Create a configuration
 
-- click policies in the main sidebar
-- click create policy at the top of the page
-- fill out the policy form
-- click create to create the policy
+- Click Configurations in the main sidebar
+- Click Create Configuration
+- Fill out the configuration form
+- Pick a configuration type
+- Click Create
 
-### Add rules to policy:
+For device settings, use a DCONF configuration and edit the JSON content. For app availability, use an Allowed Apps configuration and add apps to it.
 
-- click policies in the main sidebar
-- click on a policy to see its details
-- click Blocks in the secondary sidebar
-- add a settings block
-- click add setting from library
-- select a setting from the library (maybe try the color scheme and accent color from the desktop appearance section)
-- click the setting to configure it
+### Create a profile
 
-### Assign policy to group:
+- Click Profiles in the main sidebar
+- Click Create Profile
+- Fill out the profile form
+- Click Create
 
-- click policies in the main sidebar
-- click on a policy to see its details
-- click Assignments in the secondary sidebar
-- click create assignment
-- select a group from the dropdown
-- click create to create the assignment
+### Add configurations to a profile
 
-### Create an app policy:
+- Click Profiles in the main sidebar
+- Click on a profile to see its details
+- Click Configurations in the secondary sidebar
+- Click Add Configuration
+- Select a configuration from the dropdown
+- Click Add
 
-- click policies in the main sidebar
-- click Application Policies in the secondary sidebar
-- click create policy at the top of the page
-- fill out the policy form
-- click create to create the policy
+### Assign a profile
 
-### Add apps to app policy:
+- Click Profiles in the main sidebar
+- Click on a profile to see its details
+- Click Assignments in the secondary sidebar
+- For user enrollment, click Assign User and select a KeyStone user
+- For admin enrollment, click Assign Device and select a device
 
-- click policies in the main sidebar
-- click Application Policies in the secondary sidebar
-- click on an app policy to see its details
-- click Apps in the secondary sidebar
-- click add app to add an app to the policy
-- select an app from the dropdown
-- click add to add the app to the policy
+Only one profile can apply to a device. User-enrolled devices resolve their profile from the assigned user. Admin-enrolled devices use their direct device assignment.
 
-### Assign app policy to group:
-
-- click policies in the main sidebar
-- click Application Policies in the secondary sidebar
-- click on an app policy to see its details
-- click Assignments in the secondary sidebar
-- click create assignment
-- select a group from the dropdown
-- click create to create the assignment
-
-## How to enroll a device:
+## How to enroll a device
 
 ### Install VM
 
-- download the ISO from this file share
-- use your VM software of choice to install the linux distro
-- install and setup the linux distro like normal
+- Download the ISO from this file share
+- Use your VM software of choice to install the Linux distro
+- Install and set up the Linux distro like normal
 
-### Enroll device:
+### Enroll device
 
-- open a terminal (ptyxis)
-- run `sudo keystonedir-enroll-util`
-- enroll using the demo credentials at the top of this file (the password prompt is after the email, and doesnt show the password or prompt)
-- name dev device what you want
-- enter the number of the group you assigned the policy to
-- reboot the VM once you see the confirmation message
+- Open a terminal (ptyxis)
+- Run `sudo keystonedir-enroll-util`
+- Enroll using the demo credentials at the top of this file
+- Name the device what you want
+- Reboot the VM once you see the confirmation message
 
 ## General Tasks
 
-you should see the settings you set take effect (like the accent color and color scheme)
+You should see the configurations in the assigned profile take effect.
 
-### Install optional apps:
+### Install optional apps
 
-- open grid portal
-- click apps in the header
-- click on an app to see its details
-- click install to install the app
+- Open Grid Portal
+- Click Apps in the header
+- Click on an optional app from the assigned Allowed Apps configuration
+- Click Install

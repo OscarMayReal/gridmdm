@@ -1,7 +1,5 @@
 import { Router } from 'express'
-import { getdevice, listdevices } from '../lib/devices'
 import { VerifySession } from '../keystone'
-import { createProfile, createProfileCondition, createProfileGroupAssignment, deleteProfile, deleteProfileCondition, deleteProfileGroupAssignment, getProfile, listProfiles, updateProfile } from '../lib/profiles';
 import { createGroup, deleteGroup, getGroup, listGroups, updateGroup } from '../lib/groups';
 import { upsertKeystoneUser } from '../lib/keystone';
 

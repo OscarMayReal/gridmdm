@@ -41,6 +41,7 @@ enum PolicyBlockType {
   EXEC
   SYSTEMD
   LAPS
+  ALLOWED_APPS
 }
 
 enum AppRule {
@@ -122,6 +123,8 @@ model Tenant {
   devices           Device[]
   keystoneGroups    KeyStoneGroup[]
   enrolmentProfiles EnrolmentProfile[]
+  profiles          Profile[]
+  configurations    Configuration[]
   policies          Policy[]
   appPolicies       AppPolicy[]
   apps              App[]
@@ -167,6 +170,9 @@ model KeyStoneUser {
   appRequests     AppRequest[]
   enrolledDevices Device[]     @relation("EnrolledUser")
   createdPolicies Policy[]
+  createdProfiles Profile[]
+  createdConfigurations Configuration[]
+  profileAssignments ProfileUserAssignment[]
 
   @@map("keystone_users")
 }
@@ -204,6 +210,10 @@ model Device {
   // Current assigned user (can change via KeyStone webhook)
   assignedUserId String?
   user           KeyStoneUser? @relation("AssignedUser", fields: [assignedUserId], references: [id])
+
+  // Direct profile used for admin-enrolled devices.
+  profileId String?
+  profile   Profile? @relation(fields: [profileId], references: [id])
 
   // Enrolment profile used at enrolment time (snapshot — immutable)
   enrolmentProfileId String?
@@ -385,6 +395,78 @@ model PolicyBlock {
   policy Policy @relation(fields: [policyId], references: [id], onDelete: Cascade)
 
   @@map("policy_blocks")
+}
+
+// ============================================================
+// ACTIVE PROFILES AND CONFIGURATIONS
+// Profiles are the single container applied to devices. They
+// contain reusable configurations, and resolve either through a
+// user assignment (user enrollment) or direct device assignment
+// (admin enrollment).
+// ============================================================
+
+model Profile {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  version     String   @default("1.0.0")
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String
+
+  tenant         Tenant                 @relation(fields: [tenantId], references: [id])
+  user           KeyStoneUser           @relation(fields: [createdBy], references: [id])
+  configurations ProfileConfiguration[]
+  userAssignments ProfileUserAssignment[]
+  devices        Device[]
+
+  @@map("profiles")
+}
+
+model Configuration {
+  id          String          @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  type        PolicyBlockType
+  content     Json
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  createdBy   String
+
+  tenant   Tenant       @relation(fields: [tenantId], references: [id])
+  user     KeyStoneUser @relation(fields: [createdBy], references: [id])
+  profiles ProfileConfiguration[]
+
+  @@map("configurations")
+}
+
+model ProfileConfiguration {
+  id              String @id @default(uuid())
+  profileId       String
+  configurationId String
+  priority        Int    @default(0)
+
+  profile       Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  configuration Configuration @relation(fields: [configurationId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, configurationId])
+  @@map("profile_configurations")
+}
+
+model ProfileUserAssignment {
+  id        String   @id @default(uuid())
+  profileId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  profile Profile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  user    KeyStoneUser @relation(fields: [userId], references: [id])
+
+  @@unique([userId])
+  @@map("profile_user_assignments")
 }
 
 // ============================================================

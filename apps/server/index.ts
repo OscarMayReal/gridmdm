@@ -5,13 +5,13 @@ import keystoneRouter from "./routers/keystone";
 import tenantRouter from "./routers/tenants";
 import deviceRouter from "./routers/devices";
 import profileRouter from "./routers/profiles";
-import policyRouter from "./routers/policies";
+import configurationRouter from "./routers/configurations";
+import userRouter from "./routers/users";
 import groupRouter from "./routers/groups";
 import clientRouter from "./routers/client";
 import appRouter from "./routers/apps";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import { GeneratePolicyJson } from "./lib/policies";
 
 dotenv.config();
 
@@ -31,7 +31,9 @@ app.use("/api/v1/devices", deviceRouter);
 
 app.use("/api/v1/profiles", profileRouter);
 
-app.use("/api/v1/policies", policyRouter);
+app.use("/api/v1/configurations", configurationRouter);
+
+app.use("/api/v1/users", userRouter);
 
 app.use("/api/v1/apps", appRouter);
 

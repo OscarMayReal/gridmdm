@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  allowedDevOrigins: ['oscar-macbook-dev-3000.quntem.co.uk'],
+  allowedDevOrigins: ['oscar-macbook-dev-3000.quntem.co.uk', 'oscar-macbook-dev-3001.quntem.co.uk'],
   typescript: {
     ignoreBuildErrors: true,
   },

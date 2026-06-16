@@ -16,8 +16,16 @@ export async function listdevices({ tenantId }: { tenantId: string }) {
                     }
                 }
             },
-            enrolmentProfile: true,
-            user: true,
+            profile: true,
+            user: {
+                include: {
+                    profileAssignments: {
+                        include: {
+                            profile: true
+                        }
+                    }
+                }
+            },
             installedApps: true,
             enrolledBy: true,
             tenant: true
@@ -51,9 +59,17 @@ export async function getdevice({ tenantId, deviceId }: { tenantId: string, devi
                     }
                 }
             },
-            enrolmentProfile: true,
+            profile: true,
             commands: true,
-            user: true,
+            user: {
+                include: {
+                    profileAssignments: {
+                        include: {
+                            profile: true
+                        }
+                    }
+                }
+            },
             installedApps: true,
             enrolledBy: true,
             tenant: true,

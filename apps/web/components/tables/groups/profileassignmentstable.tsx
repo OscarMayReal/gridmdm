@@ -40,20 +40,24 @@ export function GroupProfilesByAssignmentTable({ groupId }: { groupId: string })
                 filterFn: "includesString"
             },
             {
+                id: "description",
                 header: "Description",
                 accessorKey: "description",
             },
             {
+                id: "priority",
                 header: "Priority",
                 accessorKey: "priority",
             },
             {
+                id: "devices",
                 header: "Devices",
                 cell: ({ row }) => {
                     return row.original.devices.length;
                 },
             },
             {
+                id: "createdAt",
                 header: "Created",
                 accessorKey: "createdAt",
                 cell: ({ row }) => {

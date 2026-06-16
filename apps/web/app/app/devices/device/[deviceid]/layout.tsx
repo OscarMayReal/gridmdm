@@ -1,11 +1,10 @@
 "use client"
-import { DevicesTable } from "@/components/devicestable";
 import { usePageContext } from "@/components/pageheader";
-import { ClockIcon, CrownIcon, GroupIcon, InfoIcon, KeyIcon, LaptopIcon, LayoutGridIcon, MessageSquareIcon, MonitorSmartphoneIcon, ShieldIcon, UserIcon } from "lucide-react";
+import { GroupIcon, InfoIcon } from "lucide-react";
 import { createContext, useEffect, use, useState } from "react";
 import { Device } from "@repo/database";
 import { SidebarItem } from "@/components/sidebar";
-import { SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, Sidebar } from "@/components/ui/sidebar";
+import { SidebarContent, SidebarGroup, SidebarGroupContent, Sidebar } from "@/components/ui/sidebar";
 
 export const DeviceContext = createContext<{ device: Device | null, loaded: boolean, refresh: () => void }>({
     device: null,
@@ -14,7 +13,7 @@ export const DeviceContext = createContext<{ device: Device | null, loaded: bool
 });
 
 export default function AllDevicesPage({ params, children }: { params: Promise<{ deviceid: string }>, children: React.ReactNode }) {
-    const { setAreaTitle, setIcon, setTitle, setDescription } = usePageContext();
+    const { setTitle, setDescription } = usePageContext();
     const { deviceid } = use(params)
     const [device, setDevice] = useState<{ data: Device, loaded: boolean }>({ data: null, loaded: false });
     useEffect(() => {
@@ -43,13 +42,6 @@ export default function AllDevicesPage({ params, children }: { params: Promise<{
                         <SidebarGroupContent className="flex flex-col gap-[4px]">
                             <SidebarItem equals Icon={InfoIcon} label="Overview" href={`/app/devices/device/${deviceid}`} />
                             <SidebarItem equals Icon={GroupIcon} label="Groups" href={`/app/devices/device/${deviceid}/groups`} />
-                        </SidebarGroupContent>
-                    </SidebarGroup>
-                    <SidebarGroup>
-                        <SidebarGroupLabel>Management</SidebarGroupLabel>
-                        <SidebarGroupContent className="flex flex-col gap-[4px]">
-                            <SidebarItem Icon={ShieldIcon} label="Policies" href={`/app/devices/device/${deviceid}/management/policies`} />
-                            <SidebarItem Icon={LayoutGridIcon} label="App Policies" href={`/app/devices/device/${deviceid}/management/apps`} />
                         </SidebarGroupContent>
                     </SidebarGroup>
                     {/* <SidebarGroup>

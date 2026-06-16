@@ -22,14 +22,17 @@ export function AppPolicyAppsTable({ policy, setPolicy, refresh }: { policy: App
         },
         columns: [
             {
+                id: "app",
                 accessorFn: (row) => row.app?.name,
                 header: "App",
             },
             {
+                id: "description",
                 accessorFn: (row) => row.app?.description || "",
                 header: "Description",
             },
             {
+                id: "rule",
                 accessorFn: (row) => row.rule || "",
                 header: "Rule",
             },

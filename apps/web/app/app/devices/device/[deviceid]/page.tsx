@@ -1,16 +1,15 @@
 "use client"
 import { DevicesTable } from "@/components/devicestable";
 import { usePageContext } from "@/components/pageheader";
-import { InfoIcon, LaptopIcon, MonitorSmartphoneIcon } from "lucide-react";
+import { InfoIcon } from "lucide-react";
 import { useEffect, use, useState } from "react";
-import { Device } from "@repo/database";
 import { Item, ItemGroup, ItemHeader, ItemTitle, ItemDescription, ItemContent } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
 
 export default function AllDevicesPage({ params }: { params: Promise<{ deviceid: string }> }) {
     const { setAreaTitle, setIcon, setTitle, setDescription } = usePageContext();
     const { deviceid } = use(params)
-    const [device, setDevice] = useState<{ data: Device, loaded: boolean }>({ data: null, loaded: false });
+    const [device, setDevice] = useState<{ data: any, loaded: boolean }>({ data: null, loaded: false });
     useEffect(() => {
         if (!device.loaded) {
             fetch(`/api/v1/devices/${deviceid}`, {
@@ -32,6 +31,8 @@ export default function AllDevicesPage({ params }: { params: Promise<{ deviceid:
     if (!device.loaded) {
         return null
     }
+    const resolvedProfile = device.data?.isSelfEnrolled ? device.data?.user?.profileAssignments?.[0]?.profile : device.data?.profile;
+    const profileSource = resolvedProfile ? (device.data?.isSelfEnrolled ? "Assigned User" : "Direct Device Assignment") : "Not Assigned";
     return <div className="p-4">
         <div className="flex flex-row items-center gap-4 flex-wrap">
             <Item variant={"outline"} className="bg-white flex-1 min-w-[200px]">
@@ -44,18 +45,18 @@ export default function AllDevicesPage({ params }: { params: Promise<{ deviceid:
             </Item>
             <Item variant={"outline"} className="bg-white flex-1 min-w-[200px]">
                 <ItemHeader>
-                    <ItemTitle>Policies</ItemTitle>
+                    <ItemTitle>Profile</ItemTitle>
                 </ItemHeader>
-                <div className="text-3xl">
-                    {device.data?.groups?.flatMap(group => group.group.policyAssignments).length || 0}
+                <div className="text-2xl">
+                    {resolvedProfile?.name || "None"}
                 </div>
             </Item>
             <Item variant={"outline"} className="bg-white flex-1 min-w-[200px]">
                 <ItemHeader>
-                    <ItemTitle>App Policies</ItemTitle>
+                    <ItemTitle>Profile Source</ItemTitle>
                 </ItemHeader>
-                <div className="text-3xl">
-                    {device.data?.groups?.flatMap(group => group.group.appPolicyAssignments).length || 0}
+                <div className="text-2xl">
+                    {profileSource}
                 </div>
             </Item>
         </div>

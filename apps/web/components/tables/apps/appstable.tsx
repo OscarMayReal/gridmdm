@@ -40,14 +40,17 @@ export function AppsTable() {
                 filterFn: "includesString"
             },
             {
+                id: "description",
                 header: "Description",
                 accessorKey: "description",
             },
             {
+                id: "version",
                 header: "Version",
                 accessorKey: "version",
             },
             {
+                id: "createdAt",
                 header: "Created",
                 accessorKey: "createdAt",
                 cell: ({ row }) => {

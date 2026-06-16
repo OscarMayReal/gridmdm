@@ -30,6 +30,7 @@ export function DevicesTable({mode = "all"}:{mode?: "all" | "user" | "admin"}) {
         },
         columns: [
             {
+                id: "displayName",
                 accessorKey: "displayName",
                 header: "Display Name",
             },
@@ -43,6 +44,7 @@ export function DevicesTable({mode = "all"}:{mode?: "all" | "user" | "admin"}) {
                 filterFn: "includesString"
             },
             {
+                id: "hardwareType",
                 header: "Hardware Type",
                 accessorKey: "hardwareType",
                 cell: ({ row }) => {
@@ -50,6 +52,7 @@ export function DevicesTable({mode = "all"}:{mode?: "all" | "user" | "admin"}) {
                 }
             },
             {
+                id: "softwareType",
                 header: "Software Type",
                 accessorKey: "softwareType",
                 cell: ({ row }) => {
@@ -57,6 +60,7 @@ export function DevicesTable({mode = "all"}:{mode?: "all" | "user" | "admin"}) {
                 }
             },
             {
+                id: "enrollmentType",
                 header: "Enrollment Type",
                 accessorKey: "isSelfEnrolled",
                 cell: ({ row }) => {
@@ -64,6 +68,7 @@ export function DevicesTable({mode = "all"}:{mode?: "all" | "user" | "admin"}) {
                 },
             },
             {
+                id: "assignedTo",
                 header: "Assigned To",
                 accessorKey: "user",
                 cell: ({ row }) => {

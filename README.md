@@ -9,7 +9,7 @@ link: https://drop.ui.com/95a5f99c-e206-4ca1-a0b6-696d61d110df/resources/2.0.0-b
 - Authenticates admins through KeyStone
 - Mirrors KeyStone tenant, user, and group data into the MDM database
 - Accepts KeyStone device lifecycle webhooks for enroll, unenroll, and group changes
-- Manages devices, groups, enrolment profiles, device policies, and app policies
+- Manages devices, groups, reusable configurations, and profiles
 - Proxies parts of the Flathub API for app discovery
 
 ## Monorepo Layout
@@ -125,9 +125,10 @@ Primary routes exposed by the API:
 - `/api/v1/keystone/webhook/device`: KeyStone device webhook endpoint
 - `/api/internal/v1/tenant/*`: tenant setup endpoints used by the onboarding flow
 - `/api/v1/devices`: device management
-- `/api/v1/profiles`: enrolment profiles
-- `/api/v1/policies`: device policies
-- `/api/v1/apps`: app catalog and app policies
+- `/api/v1/profiles`: ABM-style profiles assigned to users or admin-enrolled devices
+- `/api/v1/configurations`: reusable settings/app configurations
+- `/api/v1/users`: KeyStone user search for profile assignment
+- `/api/v1/apps`: app catalog
 - `/api/v1/groups`: group-based management
 
 ## Data Model
@@ -137,9 +138,10 @@ The Prisma schema models:
 - tenants
 - mirrored KeyStone users and groups
 - devices and enrollment tokens
-- enrolment profiles and conditions
-- device policies and app policies
+- reusable configurations and profiles
 - installed apps, commands, app requests, and LAPS data
+
+Profiles are the active assignment model. User-enrolled devices resolve their single profile through the assigned KeyStone user. Admin-enrolled devices can have one direct profile assignment. Configurations are reusable and can be added to more than one profile.
 
 See [`packages/database/prisma/schema.prisma`](./packages/database/prisma/schema.prisma) for the full schema.
 
@@ -148,4 +150,3 @@ See [`packages/database/prisma/schema.prisma`](./packages/database/prisma/schema
 - The server currently listens on port `6090`
 - The frontend expects KeyStone auth/session data and stores a `keystone_session` cookie during setup/sign-in
 - The web app includes local API rewrites, so both `apps/web` and `apps/server` should be running during development
-

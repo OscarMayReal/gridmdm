@@ -1,22 +1,20 @@
 "use client"
-import { DevicesTable } from "@/components/devicestable";
 import { usePageContext } from "@/components/pageheader";
-import { ClockIcon, CrownIcon, GroupIcon, InfoIcon, KeyIcon, LaptopIcon, LayoutGridIcon, ListIcon, MessageSquareIcon, MonitorSmartphoneIcon, ShieldIcon, UserIcon } from "lucide-react";
+import { InfoIcon, MonitorSmartphoneIcon } from "lucide-react";
 import { createContext, useEffect, use, useState } from "react";
-import { Device, EnrolmentProfile } from "@repo/database";
 import { SidebarItem } from "@/components/sidebar";
 import { SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, Sidebar } from "@/components/ui/sidebar";
 
-export const GroupContext = createContext<{ group: EnrolmentProfile | null, loaded: boolean, refresh: () => void }>({
+export const GroupContext = createContext<{ group: any | null, loaded: boolean, refresh: () => void }>({
     group: null,
     loaded: false,
     refresh: () => { }
 });
 
 export default function AllDevicesPage({ params, children }: { params: Promise<{ groupid: string }>, children: React.ReactNode }) {
-    const { setAreaTitle, setIcon, setTitle, setDescription } = usePageContext();
+    const { setTitle, setDescription } = usePageContext();
     const { groupid } = use(params)
-    const [profile, setProfile] = useState<{ data: EnrolmentProfile, loaded: boolean }>({ data: null, loaded: false });
+    const [profile, setProfile] = useState<{ data: any, loaded: boolean }>({ data: null, loaded: false });
     useEffect(() => {
         if (!profile.loaded) {
             fetch(`/api/v1/groups/${groupid}`, {
@@ -48,20 +46,6 @@ export default function AllDevicesPage({ params, children }: { params: Promise<{
                         <SidebarGroupLabel>Devices</SidebarGroupLabel>
                         <SidebarGroupContent>
                             <SidebarItem equals Icon={MonitorSmartphoneIcon} label="Devices" href={`/app/groups/group/${groupid}/devices`} />
-                        </SidebarGroupContent>
-                    </SidebarGroup>
-                    <SidebarGroup>
-                        <SidebarGroupLabel>Profiles</SidebarGroupLabel>
-                        <SidebarGroupContent>
-                            <SidebarItem equals Icon={ListIcon} label="Conditions" href={`/app/groups/group/${groupid}/profiles/conditions`} />
-                            <SidebarItem equals Icon={GroupIcon} label="Assignments" href={`/app/groups/group/${groupid}/profiles/assignments`} />
-                        </SidebarGroupContent>
-                    </SidebarGroup>
-                    <SidebarGroup>
-                        <SidebarGroupLabel>Policies</SidebarGroupLabel>
-                        <SidebarGroupContent>
-                            <SidebarItem equals Icon={ShieldIcon} label="Policies" href={`/app/groups/group/${groupid}/policies`} />
-                            <SidebarItem equals Icon={LayoutGridIcon} label="App Policies" href={`/app/groups/group/${groupid}/policies/app-policies`} />
                         </SidebarGroupContent>
                     </SidebarGroup>
                 </SidebarContent>

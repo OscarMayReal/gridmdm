@@ -22,6 +22,7 @@ export function AssignmentsTable({ policy, setPolicy, refresh }: { policy: Polic
         },
         columns: [
             {
+                id: "group",
                 accessorFn: (row) => row.group?.name,
                 header: "Group",
             },

@@ -1,23 +1,23 @@
 "use client"
 import { usePageContext } from "@/components/pageheader";
-import { GroupIcon } from "lucide-react";
+import { ListIcon } from "lucide-react";
 import { useEffect, useContext } from "react";
 import { ProfileContext } from "../layout";
-import { ProfileAssignmentsTable } from "@/components/tables/profiles/assignmentstable";
+import { ProfileConfigurationsTable } from "@/components/tables/profiles/configurationstable";
 
-export default function ProfileAssignmentsPage() {
+export default function ProfileConfigurationsPage() {
     const { setAreaTitle, setIcon } = usePageContext();
     const { profile, loaded, refresh } = useContext(ProfileContext);
     useEffect(() => {
         if (loaded) {
-            setAreaTitle("Assignments");
-            setIcon(GroupIcon);
+            setAreaTitle("Configurations");
+            setIcon(ListIcon);
         }
     }, [loaded]);
     if (!loaded) {
         return null;
     }
     return <div className="p-4">
-        <ProfileAssignmentsTable profile={profile} refresh={refresh} />
+        <ProfileConfigurationsTable profile={profile} refresh={refresh} />
     </div>
 }

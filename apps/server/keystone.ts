@@ -5,7 +5,7 @@ interface AuthConfig {
     appSecret?: string;
 }
 
-interface SessionData {
+export interface SessionData {
     sessionId: string;
     userAppAccessId: string;
     app: App;
@@ -66,7 +66,7 @@ export async function VerifySession({
             }
         );
 
-        const data = await response.json();
+        const data: any = await response.json();
 
         if (data.error) {
             throw new Error(data.error);

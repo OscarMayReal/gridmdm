@@ -22,6 +22,7 @@ export function GroupsAssignmentsTable({ profile, refresh }: { profile: Enrolmen
         },
         columns: [
             {
+                id: "group",
                 accessorFn: (row) => row.group?.name,
                 header: "Group",
             },

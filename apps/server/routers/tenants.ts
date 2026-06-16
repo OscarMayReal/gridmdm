@@ -18,7 +18,7 @@ router.post('/create', async (req, res) => {
         sessionId: req.cookies.keystone_session,
         appSecret: process.env.APP_SECRET!
     }).then(async (auth) => {
-        const tenant = await createTenant(auth.tenant.id, auth.tenant.name, auth.tenant.displayName || auth.tenant.name, req.body.domains)
+        const tenant = await createTenant(auth.tenant.id, auth.tenant.name, (auth.tenant as any).displayName || auth.tenant.name, req.body.domains)
         upsertKeystoneUser(auth.user)
         res.json(tenant)
     }).catch((item) => {
