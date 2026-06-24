@@ -20,6 +20,7 @@ export function AppItem({ app, onClick }: { app: any, onClick: () => void }) {
 
 export function AppDialog({ app, acquired = false, acquisitionReady = true, onAcquired }: { app: any, acquired?: boolean, acquisitionReady?: boolean, onAcquired?: (app: any) => void }) {
     const [open, setOpen] = useState(false);
+    const appId = app.app_id ?? app.id;
     if (open) {
         console.log(app);
     }
@@ -38,7 +39,7 @@ export function AppDialog({ app, acquired = false, acquisitionReady = true, onAc
                 </div>
             </DialogHeader>
             <Separator />
-            {open && <AppDialogContent appId={app.app_id} acquired={acquired} acquisitionReady={acquisitionReady} onAcquired={onAcquired} />}
+            {open && <AppDialogContent appId={appId} acquired={acquired} acquisitionReady={acquisitionReady} onAcquired={onAcquired} />}
         </DialogContent>
     </Dialog>
 }
@@ -166,6 +167,41 @@ export function useTenantApps() {
         });
     }, []);
     return apps;
+}
+
+export function useStoreCatalog() {
+    const [catalog, setCatalog] = useState<{ loaded: boolean; data: any[] }>({ loaded: false, data: [] });
+
+    useEffect(() => {
+        async function loadCatalog() {
+            const [categoriesResponse, trendingResponse] = await Promise.all([
+                fetch("/api/v1/flathubproxy/collection/category"),
+                fetch("/api/v1/flathubproxy/collection/trending")
+            ]);
+
+            const categories = await categoriesResponse.json();
+            const trending = await trendingResponse.json();
+            const catalogMap = new Map<string, any>();
+
+            for (const app of trending?.hits || []) {
+                catalogMap.set(app.app_id ?? app.id, app);
+            }
+
+            for (const category of categories || []) {
+                const response = await fetch("/api/v1/flathubproxy/collection/category/" + category);
+                const data = await response.json();
+                for (const app of data?.hits || []) {
+                    catalogMap.set(app.app_id ?? app.id, app);
+                }
+            }
+
+            setCatalog({ loaded: true, data: Array.from(catalogMap.values()) });
+        }
+
+        loadCatalog();
+    }, []);
+
+    return catalog;
 }
 
 export function getAppById(id: string) {

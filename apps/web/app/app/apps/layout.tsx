@@ -24,7 +24,7 @@ export default function DevicesLayout({ children }: { children: React.ReactNode 
                             <SidebarGroupLabel>Store</SidebarGroupLabel>
                             <SidebarGroupContent className="flex flex-col gap-[4px]">
                                 <SidebarItem Icon={CrownIcon} label="Featured Apps" href="/app/apps/store" />
-                                {/* <SidebarItem Icon={SearchIcon} label="Search Apps" href="/app/apps/store/search" /> */}
+                                <SidebarItem Icon={SearchIcon} label="Search Apps" href="/app/apps/store/search" />
                             </SidebarGroupContent>
                         </SidebarGroup>
                     </SidebarContent>
