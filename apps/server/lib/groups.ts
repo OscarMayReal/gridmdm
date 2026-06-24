@@ -1,5 +1,4 @@
 import { prisma } from "@repo/database";
-import type { EnrolmentProfileCreateInput } from "../../../packages/database/generated/prisma/models";
 
 export async function listGroups({ tenantId }: { tenantId: string }) {
     const profiles = await prisma.keyStoneGroup.findMany({
@@ -47,10 +46,11 @@ export async function updateGroup({ tenantId, groupId, data }: { tenantId: strin
     return profiles;
 }
 
-export async function createGroup({ tenantId, data }: { tenantId: string, data: EnrolmentProfileCreateInput }) {
+export async function createGroup({ tenantId, data }: { tenantId: string, data: any }) {
     const profiles = await prisma.keyStoneGroup.create({
         data: {
             ...data,
+            groupname: data.groupname || data.name,
             tenant: {
                 connect: {
                     id: tenantId

@@ -43,6 +43,7 @@ export function GroupsTable() {
                 filterFn: "includesString"
             },
             {
+                id: "devices",
                 header: "Devices",
                 accessorFn: (row) => row.devices.length,
             },

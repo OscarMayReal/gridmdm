@@ -40,20 +40,24 @@ export function AppPoliciesTable() {
                 filterFn: "includesString"
             },
             {
+                id: "description",
                 header: "Description",
                 accessorKey: "description",
             },
             {
+                id: "priority",
                 header: "Priority",
                 accessorKey: "priority",
             },
             {
+                id: "apps",
                 header: "Apps",
                 cell: ({ row }) => {
                     return row.original.apps?.length || 0;
                 },
             },
             {
+                id: "createdAt",
                 header: "Created",
                 accessorKey: "createdAt",
                 cell: ({ row }) => {

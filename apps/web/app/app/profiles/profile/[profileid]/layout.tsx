@@ -1,22 +1,20 @@
 "use client"
-import { DevicesTable } from "@/components/devicestable";
 import { usePageContext } from "@/components/pageheader";
-import { ClockIcon, CrownIcon, GroupIcon, InfoIcon, KeyIcon, LaptopIcon, LayoutGridIcon, ListIcon, MessageSquareIcon, MonitorSmartphoneIcon, ShieldIcon, UserIcon } from "lucide-react";
+import { GroupIcon, InfoIcon, ListIcon } from "lucide-react";
 import { createContext, useEffect, use, useState } from "react";
-import { Device, EnrolmentProfile } from "@repo/database";
 import { SidebarItem } from "@/components/sidebar";
-import { SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, Sidebar } from "@/components/ui/sidebar";
+import { SidebarContent, SidebarGroup, SidebarGroupContent, Sidebar } from "@/components/ui/sidebar";
 
-export const ProfileContext = createContext<{ profile: EnrolmentProfile | null, loaded: boolean, refresh: () => void }>({
+export const ProfileContext = createContext<{ profile: any | null, loaded: boolean, refresh: () => void }>({
     profile: null,
     loaded: false,
     refresh: () => { }
 });
 
 export default function AllDevicesPage({ params, children }: { params: Promise<{ profileid: string }>, children: React.ReactNode }) {
-    const { setAreaTitle, setIcon, setTitle, setDescription } = usePageContext();
+    const { setTitle, setDescription } = usePageContext();
     const { profileid } = use(params)
-    const [profile, setProfile] = useState<{ data: EnrolmentProfile, loaded: boolean }>({ data: null, loaded: false });
+    const [profile, setProfile] = useState<{ data: any, loaded: boolean }>({ data: null, loaded: false });
     useEffect(() => {
         if (!profile.loaded) {
             fetch(`/api/v1/profiles/${profileid}`, {
@@ -42,7 +40,7 @@ export default function AllDevicesPage({ params, children }: { params: Promise<{
                     <SidebarGroup>
                         <SidebarGroupContent className="flex flex-col gap-[4px]">
                             <SidebarItem equals Icon={InfoIcon} label="Overview" href={`/app/profiles/profile/${profileid}`} />
-                            <SidebarItem equals Icon={ListIcon} label="Conditions" href={`/app/profiles/profile/${profileid}/conditions`} />
+                            <SidebarItem equals Icon={ListIcon} label="Configurations" href={`/app/profiles/profile/${profileid}/configurations`} />
                             <SidebarItem equals Icon={GroupIcon} label="Assignments" href={`/app/profiles/profile/${profileid}/assignments`} />
                         </SidebarGroupContent>
                     </SidebarGroup>

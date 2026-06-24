@@ -25,8 +25,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             <SidebarItem Icon={MonitorSmartphoneIcon} label="Devices" href="/app/devices" />
                             <SidebarItem Icon={GroupIcon} label="Groups" href="/app/groups" />
                             <SidebarItem Icon={ListIcon} label="Profiles" href="/app/profiles" />
+                            <SidebarItem Icon={SettingsIcon} label="Configurations" href="/app/configurations" />
                             <SidebarItem Icon={LayoutGridIcon} label="Apps" href="/app/apps" />
-                            <SidebarItem Icon={ShieldIcon} label="Policies" href="/app/policies" />
                         </SidebarGroupContent>
                     </SidebarGroup>
                 </SidebarContent>

@@ -1,14 +1,12 @@
 "use client"
 import { usePageContext } from "@/components/pageheader";
-import { GroupIcon, InfoIcon, LaptopIcon, MonitorSmartphoneIcon } from "lucide-react";
-import { useEffect, use, useState, useContext } from "react";
-import { Device } from "@repo/database";
+import { GroupIcon } from "lucide-react";
+import { useEffect, useContext } from "react";
 import { ProfileContext } from "../layout";
-import { GroupsAssignmentsTable } from "@/components/tables/profiles/groupstable";
+import { ProfileAssignmentsTable } from "@/components/tables/profiles/assignmentstable";
 
-export default function AllDevicesPage({ params }: { params: Promise<{ profileid: string }> }) {
-    const { setAreaTitle, setIcon, setTitle, setDescription } = usePageContext();
-    const { profileid } = use(params)
+export default function ProfileAssignmentsPage() {
+    const { setAreaTitle, setIcon } = usePageContext();
     const { profile, loaded, refresh } = useContext(ProfileContext);
     useEffect(() => {
         if (loaded) {
@@ -20,6 +18,6 @@ export default function AllDevicesPage({ params }: { params: Promise<{ profileid
         return null;
     }
     return <div className="p-4">
-        <GroupsAssignmentsTable profile={profile} refresh={refresh} />
+        <ProfileAssignmentsTable profile={profile} refresh={refresh} />
     </div>
 }

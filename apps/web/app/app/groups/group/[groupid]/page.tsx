@@ -1,15 +1,13 @@
 "use client"
 import { usePageContext } from "@/components/pageheader";
-import { InfoIcon, LaptopIcon, MonitorSmartphoneIcon } from "lucide-react";
-import { useEffect, use, useState, useContext } from "react";
-import { Device } from "@repo/database";
+import { InfoIcon } from "lucide-react";
+import { useEffect, useContext } from "react";
 import { GroupContext } from "./layout";
 import { Item, ItemHeader, ItemTitle } from "@/components/ui/item";
 
-export default function AllDevicesPage({ params }: { params: Promise<{ profileid: string }> }) {
-    const { setAreaTitle, setIcon, setTitle, setDescription } = usePageContext();
-    const { profileid } = use(params)
-    const { group, loaded, refresh } = useContext(GroupContext);
+export default function GroupOverviewPage() {
+    const { setAreaTitle, setIcon } = usePageContext();
+    const { group, loaded } = useContext(GroupContext);
     useEffect(() => {
         if (loaded) {
             setAreaTitle("Overview");
@@ -24,38 +22,6 @@ export default function AllDevicesPage({ params }: { params: Promise<{ profileid
                 </ItemHeader>
                 <div className="text-3xl">
                     {group?.devices?.length || 0}
-                </div>
-            </Item>
-            <Item variant={"outline"} className="bg-white flex-1 min-w-[200px]">
-                <ItemHeader>
-                    <ItemTitle>Profile Conditions</ItemTitle>
-                </ItemHeader>
-                <div className="text-3xl">
-                    {group?.profileConditions?.length || 0}
-                </div>
-            </Item>
-            <Item variant={"outline"} className="bg-white flex-1 min-w-[200px]">
-                <ItemHeader>
-                    <ItemTitle>Profile Assignments</ItemTitle>
-                </ItemHeader>
-                <div className="text-3xl">
-                    {group?.profileAssignments?.length || 0}
-                </div>
-            </Item>
-            <Item variant={"outline"} className="bg-white flex-1 min-w-[200px]">
-                <ItemHeader>
-                    <ItemTitle>App Policies</ItemTitle>
-                </ItemHeader>
-                <div className="text-3xl">
-                    {group?.appPolicyAssignments?.length || 0}
-                </div>
-            </Item>
-            <Item variant={"outline"} className="bg-white flex-1 min-w-[200px]">
-                <ItemHeader>
-                    <ItemTitle>Policies</ItemTitle>
-                </ItemHeader>
-                <div className="text-3xl">
-                    {group?.policyAssignments?.length || 0}
                 </div>
             </Item>
         </div>

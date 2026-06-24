@@ -53,7 +53,7 @@ router.post('/webhook/device', express.json(), async (req: Request, res: Respons
     return res.status(500).json({ error: 'Internal error' })
   }
 
-  var response = { ok: true }
+  var response: any = { ok: true }
   if (req.body.event === 'enroll') {
     response.token = await prisma.deviceToken.findUnique({ where: { deviceId: req.body.device.id } })
   }

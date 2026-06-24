@@ -179,7 +179,7 @@ export async function GeneratePolicyJson(policyId: string) {
             return {
                 type: block.type,
                 description: block.description,
-                ...block.content,
+                ...(typeof block.content === "object" && block.content !== null && !Array.isArray(block.content) ? block.content : {}),
             }
         })
     }

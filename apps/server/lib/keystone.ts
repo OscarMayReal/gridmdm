@@ -162,7 +162,7 @@ export function validateWebhookPayload(raw: unknown): WebhookPayload {
 
   return {
     event: raw.event as WebhookEvent,
-    tenantId: raw.tenantId,
+    tenantId: isString(raw.tenantId) ? raw.tenantId : '',
     device: validateDevice(raw.device),
   }
 }
@@ -171,11 +171,15 @@ export function validateWebhookPayload(raw: unknown): WebhookPayload {
 // KEYSTONE MIRROR UPSERTS
 // ============================================================
 
-export async function upsertKeystoneUser(user: KeyStoneUser) {
+export async function upsertKeystoneUser(user: KeyStoneUser | { id: string, name?: string, username?: string, email?: string, role?: string }) {
+  const name = user.name || user.username || user.email || user.id;
+  const username = user.username || user.email || user.id;
+  const email = user.email || `${user.id}@unknown.local`;
+  const role = user.role || 'user';
   return prisma.keyStoneUser.upsert({
     where: { id: user.id },
-    update: { name: user.name, username: user.username, email: user.email, role: user.role },
-    create: { id: user.id, name: user.name, username: user.username, email: user.email, role: user.role },
+    update: { name, username, email, role },
+    create: { id: user.id, name, username, email, role },
   })
 }
 
@@ -195,39 +199,16 @@ export async function upsertKeystoneGroup(group: KeyStoneGroup) {
 
 // Replaces device group memberships wholesale.
 // Called on both enrol and groupsmodify events.
-export async function syncDeviceGroups(deviceId: string, groups: { group: KeyStoneGroup }[]) {
+export async function syncDeviceGroups(deviceId: string, groups: KeyStoneGroup[]) {
   console.log(`[syncDeviceGroups] syncing groups for device ${deviceId}`, groups)
-  await Promise.all(groups.map((g) => upsertKeystoneGroup(g.group)))
+  await Promise.all(groups.map((group) => upsertKeystoneGroup(group)))
 
   await prisma.$transaction([
     prisma.deviceGroup.deleteMany({ where: { deviceId } }),
     prisma.deviceGroup.createMany({
-      data: groups.map(g => ({ deviceId, groupId: g.group.id })),
+      data: groups.map(group => ({ deviceId, groupId: group.id })),
     }),
   ])
-}
-
-// ============================================================
-// ENROLMENT PROFILE RESOLUTION
-// ============================================================
-
-export async function resolveEnrolmentProfile(
-  tenantId: string,
-  groupIds: string[]
-): Promise<string | null> {
-  const profiles = await prisma.enrolmentProfile.findMany({
-    where: { tenantId },
-    include: { conditions: true },
-    orderBy: { priority: 'desc' },
-  })
-
-  for (const profile of profiles) {
-    const required = profile.conditions.map(c => c.groupId)
-    const allMatch = required.every(id => groupIds.includes(id))
-    if (allMatch) return profile.id
-  }
-
-  return null
 }
 
 // ============================================================
@@ -249,9 +230,6 @@ export async function handleEnroll(device: KeyStoneDevice): Promise<void> {
   console.log(`[handleEnroll] upserting assigned user ${device.id}`, device)
   if (device.user) await upsertKeystoneUser(device.user)
     
-  const groupIds = device.groups.map(g => g.id)
-  const profileId = await resolveEnrolmentProfile(tenantId, groupIds)
-
   console.log(`[handleEnroll] upserting device ${device.id}`, device)
   await prisma.device.upsert({
     where: { id: device.id },
@@ -278,13 +256,12 @@ export async function handleEnroll(device: KeyStoneDevice): Promise<void> {
       enrolledAt: new Date(device.enrolledAt),
       enrolledById: device.enrolledBy?.id ?? null,
       assignedUserId: device.user?.id ?? null,
-      enrolmentProfileId: device.isSelfEnrolled ? profileId : null,
       status: 'MANAGED',
       mdmTags: [],
     },
   })
 
-  console.log(`[handleEnroll] starting sync device groups for device ${device.id}`, groupIds)
+  console.log(`[handleEnroll] starting sync device groups for device ${device.id}`, device.groups.map(g => g.id))
   await syncDeviceGroups(device.id, device.groups)
 
   const existingToken = await prisma.deviceToken.findUnique({
@@ -295,33 +272,6 @@ export async function handleEnroll(device: KeyStoneDevice): Promise<void> {
     await prisma.deviceToken.create({
       data: { deviceId: device.id, token },
     })
-  }
-
-  if (device.isSelfEnrolled && device.enrolmentProfileId) {
-    const profile = await prisma.enrolmentProfile.findUnique({
-      where: { id: device.enrolmentProfileId },
-      include: {
-        assignments: {
-          include: {
-            group: true,
-          },
-        },
-      },
-    })
-    for (const assignment of profile?.assignments || []) {
-      await fetch(`${process.env.KEYSTONE_URL}/admin/mdmactions/group/${assignment.group.id}/device`, {
-        method: 'POST',
-        headers: {
-          'mdmserverid': device.mdmServerId!,
-          "authorization": `Bearer ${tenantExists.enrollmentToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          deviceId: device.id,
-        }),
-      })
-    }
-    console.log(`[enrol] device ${device.id} (${device.name}) enrolled into org ${tenantId} with profile`, profile)
   }
 
   console.log(`[enrol] device ${device.id} (${device.name}) enrolled into org ${tenantId}`)

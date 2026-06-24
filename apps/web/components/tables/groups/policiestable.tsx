@@ -40,20 +40,24 @@ export function GroupPoliciesTable({ groupId }: { groupId: string }) {
                 filterFn: "includesString"
             },
             {
+                id: "description",
                 header: "Description",
                 accessorKey: "description",
             },
             {
+                id: "priority",
                 header: "Priority",
                 accessorKey: "priority",
             },
             {
+                id: "blocks",
                 header: "Blocks",
                 cell: ({ row }) => {
                     return row.original.blocks.length;
                 },
             },
             {
+                id: "createdAt",
                 header: "Created",
                 accessorKey: "createdAt",
                 cell: ({ row }) => {

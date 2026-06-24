@@ -1,5 +1,5 @@
-import { CommandAction, CommandStatus, prisma, type AppPolicyAssignment } from "@repo/database";
-import { GeneratePolicyJson } from "./policies";
+import { CommandAction, CommandStatus, prisma } from "@repo/database";
+import { allowedAppsFromProfile, generateProfileJson, resolveDeviceProfile } from "./profiles";
 
 export function getDevice(deviceId: string) {
     return prisma.device.findUnique({
@@ -14,6 +14,7 @@ export function getDevice(deviceId: string) {
             },
             token: true,
             user: true,
+            profile: true,
             installedApps: true,
             enrolledBy: true,
             tenant: true
@@ -33,183 +34,69 @@ export async function getManifest(deviceId: string) {
                 }
             },
             user: true,
+            profile: true,
             installedApps: true,
             enrolledBy: true,
             tenant: true
         }
     });
-    const policies = await prisma.policy.findMany({
+
+    const resolvedProfile = await resolveDeviceProfile(deviceId);
+    const commands = await prisma.command.findMany({
         where: {
-            assignments: {
-                some: {
-                    group: {
-                        id: {
-                            in: device?.groups.map((group) => group.groupId)
-                        }
-                    }
-                }
-            }
-        },
-        select: {
-            id: true,
-        }
-    });
-    const appPolicies = await prisma.appPolicy.findMany({
-        where: {
-            assignments: {
-                some: {
-                    group: {
-                        id: {
-                            in: device?.groups.map((group) => group.groupId)
-                        }
-                    }
-                }
-            }
-        },
-        include: {
-            apps: {
-                include: {
-                    app: true
-                }
-            }
-        }
-    });
-    const Commands = await prisma.command.findMany({
-        where: {
-            deviceId: deviceId
+            deviceId
         },
     });
-    var policiesList: any[] = [];
-    for (const policy of policies) {
-        policiesList.push(await GeneratePolicyJson(policy.id));
-    }
-    var appsList: any[] = [];
-    for (const appPolicy of appPolicies) {
-        appsList.push(...appPolicy.apps.map((app) => app));
-    }
+
+    const apps = resolvedProfile ? allowedAppsFromProfile(resolvedProfile.profile) : [];
+
     return {
-        device: device,
-        policies: policiesList,
-        apps: appsList,
-        commands: Commands
+        device,
+        profile: resolvedProfile ? generateProfileJson(resolvedProfile) : null,
+        profiles: resolvedProfile ? [generateProfileJson(resolvedProfile)] : [],
+        policies: resolvedProfile ? [generateProfileJson(resolvedProfile)] : [],
+        apps,
+        commands
     };
 }
 
-export async function requestAppUninstall({deviceId, appId, appPolicyId}: {deviceId: string, appId: string, appPolicyId: string}) {
-    const app = await prisma.appPolicyEntry.findUnique({
-        where: {
-            appPolicyId_appId: {
-                appPolicyId: appPolicyId,
-                appId: appId
-            }
-        },
-        include: {
-            app: true,
-            appPolicy: {
-                include: {
-                    assignments: {
-                        include: {
-                            group: {
-                                include: {
-                                    devices: true
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    });
-    const device = await prisma.device.findUnique({
-        where: {
-            id: deviceId
-        },
-        include: {
-            groups: true
-        }
-    });
-    if (!app) {
-        throw new Error("App not found");
-    }
-    if (!device || !device.groups.some((group: any) => app.appPolicy?.assignments.some((assignment: AppPolicyAssignment) => assignment.groupId === group.groupId))) {
-        throw new Error("App is not assigned to this device");
-    }
-    if (app.rule !== "OPTIONAL") {
-        throw new Error("App is not optional");
-    }
+export async function requestAppUninstall({ deviceId, appId }: { deviceId: string, appId: string, appPolicyId?: string }) {
+    const appEntry = await getAllowedOptionalApp({ deviceId, appId });
     const command = await prisma.command.create({
         data: {
-            deviceId: deviceId,
+            deviceId,
             action: CommandAction.APP_REMOVE,
             issuedAt: new Date(),
             issuedBy: "device:" + deviceId,
             payload: {
-                appId: appId,
-                appPolicyId: appPolicyId
+                appId,
+                appPolicyId: appEntry.appPolicyId,
+                profileId: appEntry.profileId
             }
         }
     });
     return command;
 }
 
-export async function requestAppInstall({deviceId, appId, appPolicyId}: {deviceId: string, appId: string, appPolicyId: string}) {
-    const app = await prisma.appPolicyEntry.findUnique({
-        where: {
-            appPolicyId_appId: {
-                appPolicyId: appPolicyId,
-                appId: appId
-            }
-        },
-        include: {
-            app: true,
-            appPolicy: {
-                include: {
-                    assignments: {
-                        include: {
-                            group: {
-                                include: {
-                                    devices: true
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    });
-    const device = await prisma.device.findUnique({
-        where: {
-            id: deviceId
-        },
-        include: {
-            groups: true
-        }
-    });
-    if (!app) {
-        throw new Error("App not found");
-    }
-    if (!device || !device.groups.some((group: any) => app.appPolicy?.assignments.some((assignment: AppPolicyAssignment) => assignment.groupId === group.groupId))) {
-        throw new Error("App is not assigned to this device");
-    }
-    if (app.rule !== "OPTIONAL") {
-        throw new Error("App is not optional");
-    }
+export async function requestAppInstall({ deviceId, appId }: { deviceId: string, appId: string, appPolicyId?: string }) {
+    const appEntry = await getAllowedOptionalApp({ deviceId, appId });
     const command = await prisma.command.create({
         data: {
-            deviceId: deviceId,
+            deviceId,
             action: CommandAction.APP_INSTALL,
             issuedAt: new Date(),
             issuedBy: "device:" + deviceId,
             payload: {
-                appId: appId,
-                appPolicyId: appPolicyId
+                appId,
+                appPolicyId: appEntry.appPolicyId,
+                profileId: appEntry.profileId
             }
         }
     });
     return command;
 }
 
-export async function completeCommand({deviceId, commandId, status, result, receivedAt}: {deviceId: string, commandId: string, status: string, result?: any, receivedAt?: Date}) {
+export async function completeCommand({ deviceId, commandId, status, result, receivedAt }: { deviceId: string, commandId: string, status: string, result?: any, receivedAt?: Date }) {
     const command = await prisma.command.findUnique({
         where: {
             id: commandId
@@ -221,14 +108,35 @@ export async function completeCommand({deviceId, commandId, status, result, rece
     if (command.deviceId !== deviceId) {
         throw new Error("Command does not belong to this device");
     }
-    const updatedCommand = await prisma.command.update({
+    return prisma.command.update({
         where: {
             id: commandId
         },
         data: {
             status: status as CommandStatus,
             receivedAt: receivedAt || new Date(),
-            completedAt: new Date()
+            completedAt: new Date(),
+            detail: typeof result === "string" ? result : JSON.stringify(result || {})
         }
     });
+}
+
+async function getAllowedOptionalApp({ deviceId, appId }: { deviceId: string, appId: string }) {
+    const resolvedProfile = await resolveDeviceProfile(deviceId);
+    if (!resolvedProfile) {
+        throw new Error("No profile is assigned to this device");
+    }
+
+    const appEntry = allowedAppsFromProfile(resolvedProfile.profile).find((entry: any) => entry.appId === appId);
+    if (!appEntry) {
+        throw new Error("App is not assigned to this device");
+    }
+    if (appEntry.rule !== "OPTIONAL") {
+        throw new Error("App is not optional");
+    }
+
+    return {
+        ...appEntry,
+        profileId: resolvedProfile.profile.id
+    };
 }

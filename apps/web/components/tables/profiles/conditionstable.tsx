@@ -22,6 +22,7 @@ export function GroupsConditionsTable({ profile, refresh }: { profile: Enrolment
         },
         columns: [
             {
+                id: "group",
                 accessorFn: (row) => row.group?.name,
                 header: "Group",
             },

@@ -4,7 +4,7 @@ import { DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescript
 import { Item, ItemMedia, ItemContent, ItemTitle, ItemDescription } from "./ui/item";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
-import { PlusIcon, XIcon } from "lucide-react";
+import { CheckIcon, PlusIcon, XIcon } from "lucide-react";
 
 export function AppItem({ app, onClick }: { app: any, onClick: () => void }) {
     return <Item variant={"outline"} className="bg-white hover:cursor-pointer hover:bg-neutral-50" onClick={onClick}>
@@ -18,8 +18,9 @@ export function AppItem({ app, onClick }: { app: any, onClick: () => void }) {
     </Item>
 }
 
-export function AppDialog({ app }: { app: any }) {
+export function AppDialog({ app, acquired = false, acquisitionReady = true, onAcquired }: { app: any, acquired?: boolean, acquisitionReady?: boolean, onAcquired?: (app: any) => void }) {
     const [open, setOpen] = useState(false);
+    const appId = app.app_id ?? app.id;
     if (open) {
         console.log(app);
     }
@@ -38,32 +39,49 @@ export function AppDialog({ app }: { app: any }) {
                 </div>
             </DialogHeader>
             <Separator />
-            {open && <AppDialogContent appId={app.app_id} />}
+            {open && <AppDialogContent appId={appId} acquired={acquired} acquisitionReady={acquisitionReady} onAcquired={onAcquired} />}
         </DialogContent>
     </Dialog>
 }
 
-function AppDialogContent({ appId }: { appId: string }) {
+function AppDialogContent({ appId, acquired, acquisitionReady, onAcquired }: { appId: string, acquired: boolean, acquisitionReady: boolean, onAcquired?: (app: any) => void }) {
     const app = useAppById(appId);
-    if (!app.loaded) return null;
+    const [isAcquired, setIsAcquired] = useState(acquired);
+
+    useEffect(() => {
+        setIsAcquired(acquired);
+    }, [acquired]);
+
+    if (!app.loaded || !app.app) return null;
     return <div className="max-h-full overflow-y-auto">
         <div className="flex flex-row gap-3 max-w-full overflow-x-auto p-6 pb-0 pt-6 h-fit">
-            <Button onClick={() => {
-                console.log(app.app);
-                fetch("/api/v1/apps/acquireapp", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        appId: app.app.id,
-                        name: app.app.name,
-                        description: app.app.summary,
-                        version: app.app.version,
-                    }),
-                    credentials: "include"
-                });
-            }}><PlusIcon />Acquire</Button>
+            <Button
+                disabled={!acquisitionReady || isAcquired}
+                onClick={() => {
+                    if (!acquisitionReady || isAcquired) return;
+                    console.log(app.app);
+                    fetch("/api/v1/apps/acquireapp", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            appId: app.app.id,
+                            name: app.app.name,
+                            description: app.app.summary,
+                            version: app.app.version,
+                        }),
+                        credentials: "include"
+                    }).then(async (response) => {
+                        const createdApp = await response.json();
+                        setIsAcquired(true);
+                        onAcquired?.(createdApp);
+                    });
+                }}
+            >
+                {isAcquired ? <CheckIcon /> : <PlusIcon />}
+                {isAcquired ? "Acquired" : "Acquire"}
+            </Button>
         </div>
         <div className="px-6 pb-3 pt-6 text-lg font-medium text-[#999999]">
             Description
@@ -83,7 +101,7 @@ function AppDialogContent({ appId }: { appId: string }) {
 }
 
 export function useAppsOfTheWeek() {
-    const [appsOfTheWeek, setAppsOfTheWeek] = useState({ loaded: false, apps: [] });
+    const [appsOfTheWeek, setAppsOfTheWeek] = useState<{ loaded: boolean; apps: { aotw: any; app: any }[] }>({ loaded: false, apps: [] });
     useEffect(() => {
         fetch("/api/v1/flathubproxy/app-picks/apps-of-the-week/" + new Date().getFullYear() + "-" + (new Date().getMonth() + 1).toString().padStart(2, "0") + "-" + new Date().getDate().toString().padStart(2, "0")).then((res) => res.json()).then(async (data) => {
             const apps = [];
@@ -97,7 +115,7 @@ export function useAppsOfTheWeek() {
 }
 
 export function useAppById(id: string) {
-    const [app, setApp] = useState({ loaded: false, app: null });
+    const [app, setApp] = useState<{ loaded: boolean; app: any | null }>({ loaded: false, app: null });
     useEffect(() => {
         fetch("/api/v1/flathubproxy/appstream/" + id).then((res) => res.json()).then((data) => {
             setApp({ loaded: true, app: data });
@@ -107,7 +125,7 @@ export function useAppById(id: string) {
 }
 
 export function useTrendingApps() {
-    const [app, setApp] = useState({ loaded: false, data: null });
+    const [app, setApp] = useState<{ loaded: boolean; data: any | null }>({ loaded: false, data: null });
     useEffect(() => {
         fetch("/api/v1/flathubproxy/collection/trending").then((res) => res.json()).then((data) => {
             setApp({ loaded: true, data: data });
@@ -117,7 +135,7 @@ export function useTrendingApps() {
 }
 
 export function useCategory({ category }: { category: string }) {
-    const [app, setApp] = useState({ loaded: false, data: null });
+    const [app, setApp] = useState<{ loaded: boolean; data: any | null }>({ loaded: false, data: null });
     useEffect(() => {
         fetch("/api/v1/flathubproxy/collection/category/" + category).then((res) => res.json()).then((data) => {
             setApp({ loaded: true, data: data });
@@ -127,13 +145,63 @@ export function useCategory({ category }: { category: string }) {
 }
 
 export function useCatagories() {
-    const [app, setApp] = useState({ loaded: false, data: null });
+    const [app, setApp] = useState<{ loaded: boolean; data: string[] | null }>({ loaded: false, data: null });
     useEffect(() => {
         fetch("/api/v1/flathubproxy/collection/category").then((res) => res.json()).then((data) => {
             setApp({ loaded: true, data: data });
         });
     }, []);
     return app;
+}
+
+export function useTenantApps() {
+    const [apps, setApps] = useState<{ loaded: boolean; data: any[] }>({ loaded: false, data: [] });
+    useEffect(() => {
+        fetch("/api/v1/apps", {
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include"
+        }).then((res) => res.json()).then((data) => {
+            setApps({ loaded: true, data });
+        });
+    }, []);
+    return apps;
+}
+
+export function useStoreCatalog() {
+    const [catalog, setCatalog] = useState<{ loaded: boolean; data: any[] }>({ loaded: false, data: [] });
+
+    useEffect(() => {
+        async function loadCatalog() {
+            const [categoriesResponse, trendingResponse] = await Promise.all([
+                fetch("/api/v1/flathubproxy/collection/category"),
+                fetch("/api/v1/flathubproxy/collection/trending")
+            ]);
+
+            const categories = await categoriesResponse.json();
+            const trending = await trendingResponse.json();
+            const catalogMap = new Map<string, any>();
+
+            for (const app of trending?.hits || []) {
+                catalogMap.set(app.app_id ?? app.id, app);
+            }
+
+            for (const category of categories || []) {
+                const response = await fetch("/api/v1/flathubproxy/collection/category/" + category);
+                const data = await response.json();
+                for (const app of data?.hits || []) {
+                    catalogMap.set(app.app_id ?? app.id, app);
+                }
+            }
+
+            setCatalog({ loaded: true, data: Array.from(catalogMap.values()) });
+        }
+
+        loadCatalog();
+    }, []);
+
+    return catalog;
 }
 
 export function getAppById(id: string) {

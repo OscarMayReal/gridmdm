@@ -18,6 +18,7 @@ export function DevicesGroupsTable({device}: {device: Device}) {
         },
         columns: [
             {
+                id: "displayName",
                 header: "Display Name",
                 cell: ({ row }) => {
                     return row.original.group.name;
