@@ -48,14 +48,10 @@ export async function getManifest(deviceId: string) {
         },
     });
 
-    const apps = resolvedProfile ? allowedAppsFromProfile(resolvedProfile.profile) : [];
-
     return {
         device,
-        profile: resolvedProfile ? generateProfileJson(resolvedProfile) : null,
-        profiles: resolvedProfile ? [generateProfileJson(resolvedProfile)] : [],
         policies: resolvedProfile ? [generateProfileJson(resolvedProfile)] : [],
-        apps,
+        apps: resolvedProfile ? allowedAppsFromProfile(resolvedProfile.profile) : [],
         commands
     };
 }
