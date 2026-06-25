@@ -67,10 +67,21 @@ export async function getManifest(deviceId: string) {
             }))
     }] : [];
 
+    const apps = resolvedProfile
+        ? resolvedProfile.profile.configurations
+            .filter((entry: any) => entry.configuration.type === "ALLOWED_APPS")
+            .flatMap((entry: any) =>
+                (entry.configuration.content?.apps || []).map((appEntry: any) => ({
+                    appPolicyId: entry.configuration.id,
+                    ...appEntry
+                }))
+            )
+        : [];
+
     return {
         device,
         policies,
-        apps: resolvedProfile ? allowedAppsFromProfile(resolvedProfile.profile) : [],
+        apps,
         commands
     };
 }
