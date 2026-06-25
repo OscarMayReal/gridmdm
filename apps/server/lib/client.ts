@@ -50,6 +50,8 @@ export async function getManifest(deviceId: string) {
 
     return {
         device,
+        profile: resolvedProfile ? generateProfileJson(resolvedProfile) : null,
+        profiles: resolvedProfile ? [generateProfileJson(resolvedProfile)] : [],
         policies: resolvedProfile ? [generateProfileJson(resolvedProfile)] : [],
         apps: resolvedProfile ? allowedAppsFromProfile(resolvedProfile.profile) : [],
         commands
