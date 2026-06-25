@@ -1,5 +1,5 @@
 import { CommandAction, CommandStatus, prisma } from "@repo/database";
-import { allowedAppsFromProfile, generateProfileJson, resolveDeviceProfile } from "./profiles";
+import { allowedAppsFromProfile, resolveDeviceProfile } from "./profiles";
 
 export function getDevice(deviceId: string) {
     return prisma.device.findUnique({
@@ -34,7 +34,6 @@ export async function getManifest(deviceId: string) {
                 }
             },
             user: true,
-            profile: true,
             installedApps: true,
             enrolledBy: true,
             tenant: true
@@ -48,11 +47,29 @@ export async function getManifest(deviceId: string) {
         },
     });
 
+    const policies = resolvedProfile ? [{
+        id: resolvedProfile.profile.id,
+        version: resolvedProfile.profile.version,
+        priority: resolvedProfile.profile.configurations[0]?.priority ?? 0,
+        description: resolvedProfile.profile.description,
+        meta: {
+            author: resolvedProfile.profile.user?.name,
+            created: resolvedProfile.profile.createdAt,
+            modified: resolvedProfile.profile.updatedAt
+        },
+        policies: resolvedProfile.profile.configurations
+            .filter((entry: any) => entry.configuration.type !== "ALLOWED_APPS")
+            .map((entry: any) => ({
+                id: entry.configuration.id,
+                type: entry.configuration.type,
+                description: entry.configuration.description,
+                ...(typeof entry.configuration.content === "object" && entry.configuration.content !== null && !Array.isArray(entry.configuration.content) ? entry.configuration.content : {})
+            }))
+    }] : [];
+
     return {
         device,
-        profile: resolvedProfile ? generateProfileJson(resolvedProfile) : null,
-        profiles: resolvedProfile ? [generateProfileJson(resolvedProfile)] : [],
-        policies: resolvedProfile ? [generateProfileJson(resolvedProfile)] : [],
+        policies,
         apps: resolvedProfile ? allowedAppsFromProfile(resolvedProfile.profile) : [],
         commands
     };
