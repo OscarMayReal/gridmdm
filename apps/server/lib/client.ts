@@ -93,7 +93,7 @@ export async function getManifest(deviceId: string) {
     };
 }
 
-export async function requestAppUninstall({ deviceId, appId }: { deviceId: string, appId: string, appPolicyId?: string }) {
+export async function requestAppUninstall({ deviceId, appId, appPolicyId }: { deviceId: string, appId: string, appPolicyId?: string }) {
     const appEntry = await getAllowedOptionalApp({ deviceId, appId });
     const command = await prisma.command.create({
         data: {
@@ -103,7 +103,7 @@ export async function requestAppUninstall({ deviceId, appId }: { deviceId: strin
             issuedBy: "device:" + deviceId,
             payload: {
                 appId,
-                appPolicyId: appEntry.appPolicyId,
+                appPolicyId: appPolicyId || appEntry.appPolicyId,
                 profileId: appEntry.profileId
             }
         }
@@ -111,7 +111,7 @@ export async function requestAppUninstall({ deviceId, appId }: { deviceId: strin
     return command;
 }
 
-export async function requestAppInstall({ deviceId, appId }: { deviceId: string, appId: string, appPolicyId?: string }) {
+export async function requestAppInstall({ deviceId, appId, appPolicyId }: { deviceId: string, appId: string, appPolicyId?: string }) {
     const appEntry = await getAllowedOptionalApp({ deviceId, appId });
     const command = await prisma.command.create({
         data: {
@@ -121,7 +121,7 @@ export async function requestAppInstall({ deviceId, appId }: { deviceId: string,
             issuedBy: "device:" + deviceId,
             payload: {
                 appId,
-                appPolicyId: appEntry.appPolicyId,
+                appPolicyId: appPolicyId || appEntry.appPolicyId,
                 profileId: appEntry.profileId
             }
         }
