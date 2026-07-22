@@ -50,7 +50,7 @@ export async function getManifest(deviceId: string) {
         ...command,
         payload: {
             ...(command.payload as Record<string, unknown>),
-            appPolicyId: (command.payload as Record<string, unknown>).profileId
+            // appPolicyId: (command.payload as Record<string, unknown>).profileId
         }
     }));
 
@@ -79,7 +79,7 @@ export async function getManifest(deviceId: string) {
             .filter((entry: any) => entry.configuration.type === "ALLOWED_APPS")
             .flatMap((entry: any) =>
                 (entry.configuration.content?.apps || []).map((appEntry: any) => ({
-                    appPolicyId: entry.configuration.id,
+                    // appPolicyId: entry.configuration.id,
                     ...appEntry
                 }))
             )
