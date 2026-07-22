@@ -46,6 +46,13 @@ export async function getManifest(deviceId: string) {
             deviceId
         },
     });
+    const manifestCommands = commands.map((command) => ({
+        ...command,
+        payload: {
+            ...(command.payload as Record<string, unknown>),
+            appPolicyId: (command.payload as Record<string, unknown>).profileId
+        }
+    }));
 
     const policies = resolvedProfile ? [{
         id: resolvedProfile.profile.id,
@@ -82,7 +89,7 @@ export async function getManifest(deviceId: string) {
         device,
         policies,
         apps,
-        commands
+        commands: manifestCommands
     };
 }
 
